@@ -8,18 +8,23 @@ from flask import Flask, request
 from pymongo import MongoClient
 
 # Configuración de la base de datos PostgreSQL
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT")
-DB_NAME = os.getenv("DB_NAME")
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
+DB_HOST = os.getenv("DB_HOST_POSTGRES")  # Corrección aquí
+DB_PORT = os.getenv("DB_PORT_POSTGRES")
+DB_NAME = os.getenv("DB_NAME_POSTGRES")
+DB_USER = os.getenv("DB_USER_POSTGRES")
+DB_PASSWORD = os.getenv("DB_PASSWORD_POSTGRES")
+
+# Configuración de la base de datos MongoDB
+MONGO_HOST = os.getenv("MONGO_HOST")
+MONGO_PORT = os.getenv("MONGO_PORT")
 
 # Inicializar la conexión a la base de datos PostgreSQL
 db = Database(
     database=DB_NAME, host=DB_HOST, user=DB_USER, password=DB_PASSWORD, port=DB_PORT
 )
-client = MongoClient("localhost", 27017, username="root", password="example")
+
 # Inicializar la conexión a la base de datos MongoDB
+client = MongoClient("mongo", 27017, username="root", password="password")
 mongo_db = MongoDatabase(client)
 
 # Inicializar la instancia de AppService con ambas conexiones de base de datos
