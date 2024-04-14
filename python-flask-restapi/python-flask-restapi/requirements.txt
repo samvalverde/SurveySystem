@@ -1,5 +1,0 @@
-flask
-python-dotenv
-poetry
-pymongo
-redis
