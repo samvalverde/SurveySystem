@@ -67,31 +67,33 @@ def update_task(id):
 def delete_task(id):
     return appService.delete_task(str(id))
 
-
+##############################################################################################
+##############################################################################################
+##############################################################################################
 # Rutas para la base de datos MongoDB
-@app.route("/api/encuestas")
+@app.route("/api/encuestas")  #SIRVE
 def encuestas():
     return appService.get_encuestas()
 
 
-@app.route("/api/encuestas/<int:id>")
+@app.route("/api/encuestas/<int:id>")   #SIRVE
 def encuesta_by_id(id):
     return appService.get_encuesta_by_ID(str(id))
 
 
-@app.route("/api/encuestas", methods=["POST"])
+@app.route("/api/encuestas", methods=["POST"])    #NO SIRVE PERO SI
 def create_encuesta():
     request_data = request.get_json()
     encuesta = request_data
     return appService.create_encuesta(encuesta)
 
 
-@app.route("/api/encuestas/<int:id>", methods=["PUT"])
+@app.route("/api/encuestas/<int:id>", methods=["PUT"])    #SIRVE PERO NO
 def update_encuesta(id):
     request_data = request.get_json()
     return appService.update_encuesta(request_data, str(id))
 
 
-@app.route("/api/encuestas/<int:id>", methods=["DELETE"])
+@app.route("/api/encuestas/<int:id>", methods=["DELETE"])   #SIRVE
 def delete_encuesta(id):
     return appService.delete_encuesta(str(id))
