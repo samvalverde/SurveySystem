@@ -12,6 +12,7 @@ python-dotenv = "^1.0.1"
 psycopg2-binary = "^2.9.9"
 pymongo = "^4.0.1"
 redis = "^4.0.0" 
+flask-jwt-extended = "^4.6.0"
 
 [build-system]
 requires = ["poetry-core"]

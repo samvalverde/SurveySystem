@@ -7,6 +7,15 @@ from dbMongo import MongoDatabase  # Importa la clase MongoDatabase
 from flask import Flask, request
 from pymongo import MongoClient
 
+from flask import Flask, jsonify, request
+from flask_jwt_extended import (
+    JWTManager,
+    jwt_required,
+    create_access_token,
+    get_jwt_identity,
+)
+
+
 # Configuración de la base de datos PostgreSQL
 DB_HOST = os.getenv("DB_HOST_POSTGRES")  # Corrección aquí
 DB_PORT = os.getenv("DB_PORT_POSTGRES")
@@ -32,6 +41,27 @@ appService = AppService(db, mongo_db)
 
 # Inicializar la aplicación Flask
 app = Flask(__name__)
+app.config["JWT_SECRET_KEY"] = "1234"  # Cambia esto por tu clave secreta
+jwt = JWTManager(app)
+
+
+# Ruta para autenticación y generación de tokens
+@app.route("/login", methods=["POST"])
+def login():
+    username = request.json.get("username", None)
+    password = request.json.get("password", None)
+    if username != "user" or password != "password":
+        return jsonify({"error": "Credenciales inválidas"}), 401
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token)
+
+
+# Ruta protegida que requiere autenticación
+@app.route("/protected", methods=["GET"])
+@jwt_required()
+def protected():
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
 
 
 # Rutas para la base de datos PostgreSQL
@@ -80,10 +110,28 @@ def encuesta_by_id(id):
 
 
 @app.route("/api/encuestas", methods=["POST"])
+@jwt_required()  # Requiere autenticación JWT
 def create_encuesta():
+    current_user = (
+        get_jwt_identity()
+    )  # Obtiene la identidad del usuario desde el token JWT
+    if not current_user:
+        return (
+            jsonify({"error": "Usuario no autenticado"}),
+            401,
+        )  # Devuelve un error si el usuario no está autenticado
+
     request_data = request.get_json()
     encuesta = request_data
-    return appService.create_encuesta(encuesta)
+
+    # Llama al método del servicio para crear la encuesta
+    result = appService.create_encuesta(encuesta)
+
+    # Verifica si la creación de la encuesta fue exitosa
+    if result:
+        return jsonify({"message": "Encuesta creada correctamente"}), 201
+    else:
+        return jsonify({"error": "Error al crear la encuesta"}), 500
 
 
 @app.route("/api/encuestas/<int:id>", methods=["PUT"])
