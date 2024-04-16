@@ -16,7 +16,7 @@ class Database:
 
     def get_tasks(self):
         cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM tasks;")
+        cursor.execute("SELECT * FROM Usuario;")
         data = cursor.fetchall()
         cursor.close()
         return data
