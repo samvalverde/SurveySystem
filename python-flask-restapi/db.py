@@ -14,41 +14,41 @@ class Database:
             database=database, host=host, user=user, password=password, port=port
         )
 
-    def get_tasks(self):
+    def get_users(self):
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM Usuario;")
         data = cursor.fetchall()
         cursor.close()
         return data
 
-    def create_task(self, task):
+    def create_user(self, pUser):
         cursor = self.conn.cursor()
         cursor.execute(
-            f"INSERT INTO tasks (title, description, due_date, status, usuario) VALUES ('{task['title']}', '{task['description']}','{task['due_date']}','{task['status']}','{task['usuario']}');"
+            f"INSERT INTO Usuario (Nombre, Username, Password, IdTipoRole) VALUES ('{pUser['Nombre']}', '{pUser['Username']}','{pUser['Password']}','{pUser['IdTipoRole']}');"
         )
         self.conn.commit()
         cursor.close()
-        return task
+        return pUser
 
-    def get_tasks_by_ID(self, request_task_id):
+    def get_User_by_ID(self, request_user_id):
         cursor = self.conn.cursor()
-        cursor.execute(f"SELECT * FROM tasks WHERE id = {request_task_id};")
+        cursor.execute(f"SELECT * FROM Usuario WHERE Id = {request_user_id};")
         data = cursor.fetchall()
         cursor.close()
         return data
 
-    def update_task(self, request_task, request_task_id):
+    def update_user(self, request_user, request_user_id):
         cursor = self.conn.cursor()
         cursor.execute(
-            f"UPDATE tasks SET title = '{request_task['title']}', description = '{request_task['description']}', due_date = '{request_task['due_date']}', status = '{request_task['status']}', usuario = '{request_task['usuario']}'  WHERE id = {request_task_id};"
+            f"UPDATE Usuario SET Nombre = '{request_user['Nombre']}', Username = '{request_user['Username']}', Password = '{request_user['Password']}', IdTipoRole = '{request_user['IdTipoRole']}' WHERE Id = {request_user_id};"
         )
         self.conn.commit()
         cursor.close()
-        return request_task
+        return request_user
 
-    def delete_task(self, request_task_id):
+    def delete_user(self, request_user_id):
         cursor = self.conn.cursor()
-        cursor.execute(f"DELETE FROM tasks WHERE id = {request_task_id};")
+        cursor.execute(f"DELETE FROM Usuario WHERE Id = {request_user_id};")
         self.conn.commit()
         cursor.close()
-        return request_task_id
+        return request_user_id
