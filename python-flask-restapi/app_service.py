@@ -9,25 +9,25 @@ class AppService:
         self.mongo_database = mongo_database
 
     # Métodos para la base de datos PostgreSQL
-    def get_tasks(self):
-        data = self.database.get_tasks()
+    def get_users(self):
+        data = self.database.get_users()
         return data
 
-    def get_task_by_ID(self, request_task_id):
-        data = self.database.get_tasks_by_ID(request_task_id)
+    def get_User_by_ID(self, request_user_id):
+        data = self.database.get_User_by_ID(request_user_id)
         return data
 
-    def create_task(self, task):
-        self.database.create_task(task)
+    def create_user(self, task):
+        self.database.create_user(task)
         return task
 
-    def update_task(self, request_task, request_task_id):
-        self.database.update_task(request_task, request_task_id)
-        return request_task
+    def update_user(self, request_user, request_user_id):
+        self.database.update_user(request_user, request_user_id)
+        return request_user
 
-    def delete_task(self, request_task_id):
-        self.database.delete_task(request_task_id)
-        return request_task_id
+    def delete_user(self, request_user_id):
+        self.database.delete_user(request_user_id)
+        return request_user_id
 
     # Métodos para la base de datos MongoDB
     def get_encuestas(self):

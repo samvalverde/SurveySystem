@@ -46,12 +46,23 @@ jwt = JWTManager(app)
 
 
 # Ruta para autenticación y generación de tokens
-@app.route("/login", methods=["POST"])
+@app.route("/auth/login", methods=["POST"])
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-    if username != "user" or password != "password":
+
+    # Verificar si el usuario y la contraseña existen en la base de datos
+    cursor = db.conn.cursor()
+    cursor.execute(
+        f"SELECT * FROM Usuario WHERE Username = '{username}' AND Password = '{password}';"
+    )
+    user_data = cursor.fetchone()
+    cursor.close()
+
+    if user_data is None:
         return jsonify({"error": "Credenciales inválidas"}), 401
+
+    # Crear el token de acceso para el usuario autenticado
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token)
 
@@ -64,38 +75,32 @@ def protected():
     return jsonify(logged_in_as=current_user), 200
 
 
-# Rutas para la base de datos PostgreSQL
-@app.route("/")
-def home():
-    return "Conectado a la base de datos de tareas."
-
-
-@app.route("/api/tasks")
-def tasks():
-    return appService.get_tasks()
-
-
-@app.route("/api/tasks/<int:id>")
-def tasks_by_id(id):
-    return appService.get_task_by_ID(str(id))
-
-
-@app.route("/api/tasks", methods=["POST"])
-def create_task():
+@app.route("/auth/register", methods=["POST"])
+def create_user():
     request_data = request.get_json()
-    task = request_data
-    return appService.create_task(task)
+    user = request_data
+    return appService.create_user(user)
 
 
-@app.route("/api/tasks/<int:id>", methods=["PUT"])
-def update_task(id):
+@app.route("/users")
+def users():
+    return appService.get_users()
+
+
+@app.route("/users/<int:id>")
+def user_by_id(id):
+    return appService.get_User_by_ID(str(id))
+
+
+@app.route("/users/<int:id>", methods=["PUT"])
+def update_user(id):
     request_data = request.get_json()
-    return appService.update_task(request_data, str(id))
+    return appService.update_user(request_data, str(id))
 
 
-@app.route("/api/tasks/<int:id>", methods=["DELETE"])
-def delete_task(id):
-    return appService.delete_task(str(id))
+@app.route("/users/<int:id>", methods=["DELETE"])
+def delete_user(id):
+    return appService.delete_user(str(id))
 
 ##############################################################################################
 ##############################################################################################
