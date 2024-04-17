@@ -17,9 +17,9 @@ class AppService:
         data = self.database.get_User_by_ID(request_user_id)
         return data
 
-    def create_user(self, task):
-        self.database.create_user(task)
-        return task
+    def create_user(self, user):
+        self.database.create_user(user)
+        return user
 
     def update_user(self, request_user, request_user_id):
         self.database.update_user(request_user, request_user_id)
@@ -40,6 +40,7 @@ class AppService:
 
     def create_encuesta(self, encuesta):
         self.mongo_database.insert_encuesta(encuesta)
+        self.database.insert_encuesta(encuesta)
         return encuesta
 
     def update_encuesta(self, encuesta_id, updated_encuesta):
@@ -49,3 +50,7 @@ class AppService:
     def delete_encuesta(self, encuesta_id):
         self.mongo_database.delete_encuesta(encuesta_id)
         return encuesta_id
+
+    def get_encuestassql(self):
+        data = self.database.get_encuestassql()
+        return data

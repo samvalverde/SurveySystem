@@ -52,3 +52,19 @@ class Database:
         self.conn.commit()
         cursor.close()
         return request_user_id
+
+    def insert_encuesta(self, pEncuesta):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            f"INSERT INTO Encuesta (Id, Nombre) VALUES ('{pEncuesta['id_encuesta']}', '{pEncuesta['titulo_encuesta']}');"
+        )
+        self.conn.commit()
+        cursor.close()
+        return pEncuesta
+    
+    def get_encuestassql(self):
+        cursor = self.conn.cursor()
+        cursor.execute("SELECT * FROM Encuesta;")
+        data = cursor.fetchall()
+        cursor.close()
+        return data

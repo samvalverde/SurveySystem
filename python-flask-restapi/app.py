@@ -148,3 +148,8 @@ def update_encuesta(id):
 @app.route("/api/encuestas/<int:id>", methods=["DELETE"])
 def delete_encuesta(id):
     return appService.delete_encuesta(str(id))
+
+
+@app.route("/encuestassql")
+def encuestassql():
+    return appService.get_encuestassql()
