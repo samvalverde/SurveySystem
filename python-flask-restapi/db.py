@@ -62,6 +62,22 @@ class Database:
         cursor.close()
         return pEncuesta
     
+    def update_encuesta(self, encuesta_id, pEncuesta):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            f"UPDATE Encuesta SET Nombre = '{pEncuesta['titulo_encuesta']}' WHERE Id = {encuesta_id};"
+        )
+        self.conn.commit()
+        cursor.close()
+        return pEncuesta
+    
+    def delete_encuesta(self, encuesta_id):
+        cursor = self.conn.cursor()
+        cursor.execute(f"DELETE FROM Encuesta WHERE Id = {encuesta_id};")
+        self.conn.commit()
+        cursor.close()
+        return encuesta_id
+    
     def get_encuestassql(self):
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM Encuesta;")

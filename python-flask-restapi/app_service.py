@@ -43,12 +43,14 @@ class AppService:
         self.database.insert_encuesta(encuesta)
         return encuesta
 
-    def update_encuesta(self, encuesta_id, updated_encuesta):
+    def update_encuesta(self, updated_encuesta, encuesta_id):
         self.mongo_database.update_encuesta(encuesta_id, updated_encuesta)
+        self.database.update_encuesta(encuesta_id, updated_encuesta)
         return updated_encuesta
 
     def delete_encuesta(self, encuesta_id):
         self.mongo_database.delete_encuesta(encuesta_id)
+        self.database.delete_encuesta(encuesta_id)
         return encuesta_id
 
     def get_encuestassql(self):

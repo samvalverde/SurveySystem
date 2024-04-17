@@ -142,7 +142,12 @@ def create_encuesta():
 @app.route("/api/encuestas/<int:id>", methods=["PUT"])
 def update_encuesta(id):
     request_data = request.get_json()
-    return appService.update_encuesta(request_data, str(id))
+    result = appService.update_encuesta(request_data, str(id))
+    # Verifica si la creación de la encuesta fue exitosa
+    if result:
+        return jsonify({"message": "Encuesta modificada correctamente"}), 201
+    else:
+        return jsonify({"error": "Error al modificar la encuesta"}), 500
 
 
 @app.route("/api/encuestas/<int:id>", methods=["DELETE"])

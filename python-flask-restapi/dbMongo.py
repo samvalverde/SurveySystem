@@ -27,21 +27,29 @@ class MongoDatabase:
         self._convert_object_ids(encuesta)
         return encuesta
 
+#
+#    def update_encuesta(self, updated_encuesta_json, encuesta_id):
+#        # Convierte el JSON a un diccionario
+#        updated_encuesta = json.loads(updated_encuesta_json)
+#        # Verifica que updated_encuesta sea un diccionario
+#        if isinstance(updated_encuesta, dict):
+#            # Elimina el id_encuesta del diccionario
+#            if "id_encuesta" in updated_encuesta:
+#                del updated_encuesta["id_encuesta"]
+#            # Realiza la actualización utilizando el modificador $set
+#            self.collection.update_one(
+#                {"id_encuesta": encuesta_id}, {"$set": updated_encuesta}
+#            )
+#            return updated_encuesta
+#        else:
+#            return "Error: El JSON proporcionado no es válido"
+#
+
     def update_encuesta(self, encuesta_id, updated_encuesta_json):
-        # Convierte el JSON a un diccionario
-        updated_encuesta = json.loads(updated_encuesta_json)
-        # Verifica que updated_encuesta sea un diccionario
-        if isinstance(updated_encuesta, dict):
-            # Elimina el id_encuesta del diccionario
-            if "id_encuesta" in updated_encuesta:
-                del updated_encuesta["id_encuesta"]
-            # Realiza la actualización utilizando el modificador $set
-            self.collection.update_one(
-                {"id_encuesta": encuesta_id}, {"$set": updated_encuesta}
-            )
-            return updated_encuesta
-        else:
-            return "Error: El JSON proporcionado no es válido"
+        self.collection.delete_one({"id_encuesta": encuesta_id})
+        self._convert_object_ids(updated_encuesta_json)
+        self.collection.insert_one(updated_encuesta_json)
+        return updated_encuesta_json
 
     def delete_encuesta(self, encuesta_id):
         result = self.collection.delete_one({"id_encuesta": encuesta_id})
