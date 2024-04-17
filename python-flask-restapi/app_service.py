@@ -49,3 +49,25 @@ class AppService:
     def delete_encuesta(self, encuesta_id):
         self.mongo_database.delete_encuesta(encuesta_id)
         return encuesta_id
+    
+    # Métodos para preguntas en la base de datos MongoDB
+    def create_pregunta(self, pregunta):
+        self.mongo_database.insert_pregunta(pregunta)
+        return pregunta
+
+    def get_preguntas_by_encuesta_id(self, encuesta_id):
+        data = self.mongo_database.get_preguntas_by_encuesta_id(encuesta_id)
+        return data
+
+    def get_pregunta_by_id(self, encuesta_id, pregunta_id):
+        data = self.mongo_database.get_pregunta_by_id(encuesta_id, pregunta_id)
+        return data
+
+    def update_pregunta(self, pregunta_id, updated_pregunta):
+        self.mongo_database.update_pregunta(pregunta_id, updated_pregunta)
+        return updated_pregunta
+
+    def delete_pregunta(self, encuesta_id, pregunta_id):
+        self.mongo_database.delete_pregunta(encuesta_id, pregunta_id)
+        return pregunta_id
+

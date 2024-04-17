@@ -104,17 +104,17 @@ def delete_user(id):
 
 
 # Rutas para la base de datos MongoDB
-@app.route("/api/encuestas")
+@app.route("/api/surveys")
 def encuestas():
     return appService.get_encuestas()
 
 
-@app.route("/api/encuestas/<int:id>")
+@app.route("/api/surveys/<int:id>")
 def encuesta_by_id(id):
     return appService.get_encuesta_by_ID(str(id))
 
 
-@app.route("/api/encuestas", methods=["POST"])
+@app.route("/api/surveys", methods=["POST"])
 @jwt_required()  # Requiere autenticación JWT
 def create_encuesta():
     current_user = (
@@ -139,12 +139,42 @@ def create_encuesta():
         return jsonify({"error": "Error al crear la encuesta"}), 500
 
 
-@app.route("/api/encuestas/<int:id>", methods=["PUT"])
+@app.route("/api/surveys/<int:id>", methods=["PUT"])
 def update_encuesta(id):
     request_data = request.get_json()
     return appService.update_encuesta(request_data, str(id))
 
 
-@app.route("/api/encuestas/<int:id>", methods=["DELETE"])
+@app.route("/api/surveys/<int:id>", methods=["DELETE"])
 def delete_encuesta(id):
     return appService.delete_encuesta(str(id))
+
+
+@app.route("/api/surveys/<int:id>/questions", methods=["POST"])
+@jwt_required()  
+def create_pregunta(id):
+    request_data = request.get_json()
+    pregunta = request_data
+    result = appService.create_pregunta(pregunta)
+    if result:
+        return jsonify({"message": "Pregunta creada correctamente"}), 201
+    else:
+        return jsonify({"error": "Error al crear la pregunta"}), 500
+
+
+@app.route("/api/surveys/<int:id>/questions", methods=["GET"])
+@jwt_required()
+def get_preguntas(id):
+    current_user = get_jwt_identity()
+    return jsonify(logged_in_as=current_user), 200
+
+
+@app.route("/api/surveys/<int:id>/questions/<int:questionId>", methods=["PUT"])
+def update_pregunta(id, questionId):
+    request_data = request.get_json()
+    return appService.update_pregunta(request_data, str(id), str(questionId))
+
+
+@app.route("/api/surveys/<int:id>/questions/<int:questionId>", methods=["DELETE"])
+def delete_pregunta(id, questionId):
+    return appService.delete_pregunta(str(id), str(questionId))
