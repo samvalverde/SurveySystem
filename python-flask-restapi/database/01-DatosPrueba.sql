@@ -25,3 +25,4 @@ UPDATE EncuestaXUsuario
 SET Completada = 1
 WHERE IdEncuesta = 2;
 
+

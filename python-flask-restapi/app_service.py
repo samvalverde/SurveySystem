@@ -29,6 +29,10 @@ class AppService:
         self.database.delete_user(request_user_id)
         return request_user_id
 
+    def get_encuestassql(self):
+        data = self.database.get_encuestassql()
+        return data
+
     # Métodos para la base de datos MongoDB
     def get_encuestas(self):
         data = self.mongo_database.get_encuestas()
