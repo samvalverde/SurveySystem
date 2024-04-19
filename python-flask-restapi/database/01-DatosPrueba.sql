@@ -11,14 +11,12 @@ INSERT INTO Usuario (Nombre, Username, Password, IdTipoRole) VALUES
   , ('Kenneth', 'kennorsdb', '123', 1);
 
 INSERT INTO Encuesta (Id, Nombre) VALUES 
-    (1, 'Encuesta Satisfaccion 1')
-  , (2, 'Encuesta Satisfaccion 2')
-  , (3, 'Encuesta Satisfaccion 3');
+    (1, 'Encuesta de satisfacción')
+  , (2, 'Encuesta de opinión');
 
 INSERT INTO EncuestaXUsuario (IdEncuesta, IdUsuario, FechaAsignacion) VALUES 
     (1, 1, '2024-04-15')
-  , (2, 1, '2024-04-15')
-  , (3, 1, '2024-04-15');
+  , (2, 1, '2024-04-15');
 
 INSERT INTO RespuestaEncuesta (IdEncuestaXUsuario, FechaRespuesta) VALUES 
     (2, '2024-04-16');
@@ -26,4 +24,5 @@ INSERT INTO RespuestaEncuesta (IdEncuestaXUsuario, FechaRespuesta) VALUES
 UPDATE EncuestaXUsuario 
 SET Completada = 1
 WHERE IdEncuesta = 2;
+
 

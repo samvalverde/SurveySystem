@@ -29,6 +29,10 @@ class AppService:
         self.database.delete_user(request_user_id)
         return request_user_id
 
+    def get_encuestassql(self):
+        data = self.database.get_encuestassql()
+        return data
+
     # Métodos para la base de datos MongoDB
     def get_encuestas(self):
         data = self.mongo_database.get_encuestas()
@@ -40,14 +44,17 @@ class AppService:
 
     def create_encuesta(self, encuesta):
         self.mongo_database.insert_encuesta(encuesta)
+        self.database.insert_encuesta(encuesta)
         return encuesta
 
-    def update_encuesta(self, encuesta_id, updated_encuesta):
+    def update_encuesta(self, updated_encuesta, encuesta_id):
         self.mongo_database.update_encuesta(encuesta_id, updated_encuesta)
+        self.database.update_encuesta(encuesta_id, updated_encuesta)
         return updated_encuesta
 
     def delete_encuesta(self, encuesta_id):
         self.mongo_database.delete_encuesta(encuesta_id)
+        self.database.delete_encuesta(encuesta_id)
         return encuesta_id
     
     # Métodos para preguntas en la base de datos MongoDB

@@ -13,6 +13,7 @@ from flask_jwt_extended import (
     jwt_required,
     create_access_token,
     get_jwt_identity,
+    verify_jwt_in_request,
 )
 
 
@@ -67,12 +68,32 @@ def login():
     return jsonify(access_token=access_token)
 
 
-# Ruta protegida que requiere autenticación
-@app.route("/protected", methods=["GET"])
-@jwt_required()
-def protected():
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
+def check_role(required_role):
+    try:
+        # Verificar que el token JWT esté presente en la solicitud
+        verify_jwt_in_request()
+
+        # Obtener la identidad del usuario desde el token JWT
+        current_user = get_jwt_identity()
+
+        # Consultar la base de datos para obtener el rol del usuario
+        cursor = db.conn.cursor()
+        cursor.execute(
+            f"SELECT IdTipoRole FROM Usuario WHERE Username = '{current_user}';"
+        )
+        user_role_id = cursor.fetchone()
+        cursor.close()
+
+        if user_role_id is None:
+            return False
+
+        # Verificar si el usuario tiene el rol requerido
+        return user_role_id[0] == required_role
+
+    except Exception as e:
+        # Manejar cualquier error que pueda ocurrir durante la verificación
+        print(f"Error durante la verificación de roles: {str(e)}")
+        return False
 
 
 @app.route("/auth/register", methods=["POST"])
@@ -84,6 +105,11 @@ def create_user():
 
 @app.route("/users")
 def users():
+    if not check_role(1):
+        return (
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
+            403,
+        )
     return appService.get_users()
 
 
@@ -94,6 +120,15 @@ def user_by_id(id):
 
 @app.route("/users/<int:id>", methods=["PUT"])
 def update_user(id):
+    verify_jwt_in_request()
+    # Obtener el ID del usuario actual desde el token JWT
+    current_user_id = get_jwt_identity()
+
+    # Verificar si el usuario tiene permiso para realizar la actualización
+    if not check_role(1) and current_user_id != id:
+        return jsonify({"error": "Usuario no autorizado para editar este perfil"}), 403
+
+    # Si pasó la verificación, proceder con la actualización del usuario
     request_data = request.get_json()
     return appService.update_user(request_data, str(id))
 
@@ -104,27 +139,24 @@ def delete_user(id):
 
 
 # Rutas para la base de datos MongoDB
-@app.route("/api/surveys")
+@app.route("/surveys")
 def encuestas():
     return appService.get_encuestas()
 
 
-@app.route("/api/surveys/<int:id>")
+@app.route("/surveys/<int:id>")
 def encuesta_by_id(id):
     return appService.get_encuesta_by_ID(str(id))
 
 
-@app.route("/api/surveys", methods=["POST"])
+# --------------------------------------------------------------------------   Rutas para la base de datos MongoDB
+
+
+@app.route("/surveys", methods=["POST"])
 @jwt_required()  # Requiere autenticación JWT
 def create_encuesta():
-    current_user = (
-        get_jwt_identity()
-    )  # Obtiene la identidad del usuario desde el token JWT
-    if not current_user:
-        return (
-            jsonify({"error": "Usuario no autenticado"}),
-            401,
-        )  # Devuelve un error si el usuario no está autenticado
+    if check_role(3):
+        return jsonify({"error": "Usuario no autorizado para crear encuestas"}), 403
 
     request_data = request.get_json()
     encuesta = request_data
@@ -139,42 +171,22 @@ def create_encuesta():
         return jsonify({"error": "Error al crear la encuesta"}), 500
 
 
-@app.route("/api/surveys/<int:id>", methods=["PUT"])
+@app.route("/surveys/<int:id>", methods=["PUT"])
 def update_encuesta(id):
     request_data = request.get_json()
-    return appService.update_encuesta(request_data, str(id))
+    result = appService.update_encuesta(request_data, str(id))
+    # Verifica si la creación de la encuesta fue exitosa
+    if result:
+        return jsonify({"message": "Encuesta modificada correctamente"}), 201
+    else:
+        return jsonify({"error": "Error al modificar la encuesta"}), 500
 
 
-@app.route("/api/surveys/<int:id>", methods=["DELETE"])
+@app.route("/surveys/<int:id>", methods=["DELETE"])
 def delete_encuesta(id):
     return appService.delete_encuesta(str(id))
 
 
-@app.route("/api/surveys/<int:id>/questions", methods=["POST"])
-@jwt_required()  
-def create_pregunta(id):
-    request_data = request.get_json()
-    pregunta = request_data
-    result = appService.create_pregunta(pregunta)
-    if result:
-        return jsonify({"message": "Pregunta creada correctamente"}), 201
-    else:
-        return jsonify({"error": "Error al crear la pregunta"}), 500
-
-
-@app.route("/api/surveys/<int:id>/questions", methods=["GET"])
-@jwt_required()
-def get_preguntas(id):
-    current_user = get_jwt_identity()
-    return jsonify(logged_in_as=current_user), 200
-
-
-@app.route("/api/surveys/<int:id>/questions/<int:questionId>", methods=["PUT"])
-def update_pregunta(id, questionId):
-    request_data = request.get_json()
-    return appService.update_pregunta(request_data, str(id), str(questionId))
-
-
-@app.route("/api/surveys/<int:id>/questions/<int:questionId>", methods=["DELETE"])
-def delete_pregunta(id, questionId):
-    return appService.delete_pregunta(str(id), str(questionId))
+@app.route("/encuestassql")
+def encuestassql():
+    return appService.get_encuestassql()
