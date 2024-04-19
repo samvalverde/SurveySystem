@@ -44,21 +44,19 @@ class AppService:
 
     # seccion de encuestas
     def get_encuestas(self):
-        # Clave para almacenar en caché los datos de las encuestas
         cache_key = "encuestas"
-
-        # Intentar recuperar los datos de la caché
         cached_data = self.redis_client.get(cache_key)
 
         if cached_data:
-            # Si los datos están en caché, devolverlos directamente
-            return cached_data.decode("utf-8")
+            return json.loads(cached_data)
 
-        # Si los datos no están en caché, obtenerlos de la base de datos
         data = self.mongo_database.get_encuestas()
 
-        # Almacenar los datos en caché para futuras solicitudes
-        self.redis_client.set(cache_key, data)
+        # Convertir los datos a un formato adecuado para caché
+        cached_data = json.dumps(data)
+
+        # Almacenar en caché los datos con una expiración de 1 hora (3600 segundos)
+        self.redis_client.setex(cache_key, 3600, cached_data)
 
         return data
 
@@ -93,10 +91,14 @@ class AppService:
         cache_key = f"questions:{survey_id}"
         cached_data = self.redis_client.get(cache_key)
         if cached_data:
+            # Si hay datos en caché, se devuelven después de cargarlos y convertirlos de JSON a Python dict
             return json.loads(cached_data)
         else:
+            # Si no hay datos en caché, se obtienen de la base de datos MongoDB
             data = self.mongo_database.get_questions(survey_id)
-            self.redis_client.set(cache_key, json.dumps(data))
+            # Convertir los datos a formato JSON antes de almacenarlos en caché
+            json_data = json.dumps(data)
+            self.redis_client.set(cache_key, json_data)
             return data
 
     def update_question(self, survey_id, question_id, updated_question_data):
@@ -113,21 +115,19 @@ class AppService:
         cache_key = "respondents"
         cached_data = self.redis_client.get(cache_key)
         if cached_data:
+            # Si hay datos en caché, se devuelven después de cargarlos y convertirlos de JSON a Python dict
             return json.loads(cached_data)
         else:
+            # Si no hay datos en caché, se obtienen de la base de datos
             data = self.database.get_respondents()
-            self.redis_client.set(cache_key, json.dumps(data))
+            # Convertir los datos a formato JSON antes de almacenarlos en caché
+            json_data = json.dumps(data)
+            self.redis_client.set(cache_key, json_data)
             return data
 
     def get_respondent_by_ID(self, request_respondent_id):
-        cache_key = f"respondent:{request_respondent_id}"
-        cached_data = self.redis_client.get(cache_key)
-        if cached_data:
-            return json.loads(cached_data)
-        else:
-            data = self.database.get_respondent_by_ID(request_respondent_id)
-            self.redis_client.set(cache_key, json.dumps(data))
-            return data
+        data = self.database.get_respondent_by_ID(request_respondent_id)
+        return data
 
     def create_respondent(self, respondent):
         self.database.create_respondent(respondent)
@@ -151,10 +151,14 @@ class AppService:
         cache_key = f"responses:{encuesta_id}"
         cached_data = self.redis_client.get(cache_key)
         if cached_data:
+            # Si hay datos en caché, se devuelven después de cargarlos y convertirlos de JSON a Python dict
             return json.loads(cached_data)
         else:
+            # Si no hay datos en caché, se obtienen de la base de datos
             data = self.mongo_database.get_responses(encuesta_id)
-            self.redis_client.set(cache_key, json.dumps(data))
+            # Convertir los datos a formato JSON antes de almacenarlos en caché
+            json_data = json.dumps(data)
+            self.redis_client.set(cache_key, json_data)
             return data
 
     # Seccion de reportes y analisis
