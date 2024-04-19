@@ -50,7 +50,7 @@ jobs:
         context: .
         file: ./python-flask-restapi/Dockerfile
         push: true
-        tags: ${{ github.repository }} # lowercase ??
+        tags: samvalverde/surveysystem:latest # lowercase ${{ github.repository }} ??
         
     - name: Login to GitHub Container Registry
       uses: docker/login-action@v1
