@@ -56,3 +56,21 @@ class AppService:
         self.mongo_database.delete_encuesta(encuesta_id)
         self.database.delete_encuesta(encuesta_id)
         return encuesta_id
+
+    def publish_survey(self, id):
+        self.mongo_database.publish_encuesta(id)
+        return id
+
+    def add_question(self, survey_id, question_data):
+        return self.mongo_database.add_question(survey_id, question_data)
+
+    def get_questions(self, survey_id):
+        return self.mongo_database.get_questions(survey_id)
+
+    def update_question(self, survey_id, question_id, updated_question_data):
+        return self.mongo_database.update_question(
+            survey_id, question_id, updated_question_data
+        )
+
+    def delete_question(self, survey_id, question_id):
+        return self.mongo_database.delete_question(survey_id, question_id)

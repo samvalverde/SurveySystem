@@ -10,6 +10,7 @@ db.encuestas.createIndex({ id_encuesta: 1 }, { unique: true });
 db.encuestas.insertMany([
   {
     id_encuesta: "1",
+    publica: "True",
     titulo_encuesta: "Encuesta de satisfacción",
     preguntas: [
       {
@@ -32,6 +33,7 @@ db.encuestas.insertMany([
   },
   {
     id_encuesta: "2",
+    publica: "False",
     titulo_encuesta: "Encuesta de opinión",
     preguntas: [
       {
