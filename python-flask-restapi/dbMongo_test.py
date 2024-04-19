@@ -10,8 +10,6 @@ def mongo_client():
     yield client
     client.close()
 
-
-
 @pytest.fixture(scope="module")
 def mongo_database(mongo_client):
     database = MongoDatabase(mongo_client)
