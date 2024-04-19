@@ -14,8 +14,6 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: password
 
-
-
   mongo-express:
     image: mongo-express
     restart: always
@@ -29,7 +27,12 @@ services:
       ME_CONFIG_MONGODB_SERVER: mongo
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: password
-
+  redis:
+    image: redis
+    networks:
+      - web
+    ports:
+      - 6379:6379
   app:
     build: .
     environment:
