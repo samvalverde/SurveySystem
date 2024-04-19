@@ -66,7 +66,7 @@ db.respuestas.createIndex({ encuesta_id: 1, usuario_id: 1 }, { unique: false });
 db.respuestas.insertMany([{
   encuesta_id: "1",
   usuario_id: "1",
-  preguntas: [
+  respuestas: [
     {
     pregunta_num: "1",
     texto_pregunta: "¿Cómo calificarías nuestro servicio?",
@@ -81,7 +81,7 @@ db.respuestas.insertMany([{
     {
     encuesta_id: "2",
     usuario_id: "1",
-    preguntas: [
+    respuestas: [
       {
       pregunta_num: "1",
       texto_pregunta: "¿Cuál es tu opinión sobre nuestro nuevo servicio?",

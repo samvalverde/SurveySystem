@@ -53,13 +53,6 @@ class Database:
         cursor.close()
         return request_user_id
 
-    def get_encuestassql(self):
-        cursor = self.conn.cursor()
-        cursor.execute("SELECT * FROM Encuesta;")
-        data = cursor.fetchall()
-        cursor.close()
-        return data
-
     def insert_encuesta(self, pEncuesta):
         cursor = self.conn.cursor()
         cursor.execute(

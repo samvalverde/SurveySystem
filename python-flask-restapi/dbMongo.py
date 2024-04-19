@@ -7,6 +7,7 @@ class MongoDatabase:
         self.client = mongoClient
         self.database = self.client["EncuestasDB"]
         self.collection = self.database["encuestas"]
+        self.responsesCollect = self.database["respuestas"]
 
     def insert_encuesta(self, encuesta_data):
         # Convertir ObjectId a una representación serializable si es necesario
@@ -144,3 +145,72 @@ class MongoDatabase:
         except Exception as e:
             print(f"Error al eliminar la pregunta: {str(e)}")
             return False
+
+    # ------------------------------------------------------- SECCION DE RESPUESTAS A ENCUESTAS -------------------------------------------------------
+
+    def submit_response(self, encuesta_id, usuario_id, response_data):
+        try:
+            response = {
+                "encuesta_id": encuesta_id,
+                "usuario_id": usuario_id,
+                "respuestas": response_data,
+            }
+            self.responsesCollect.insert_one(response)
+            return True
+        except Exception as e:
+            print(f"Error al guardar la respuesta: {str(e)}")
+            return False
+
+    def get_responses(self, encuesta_id):
+        try:
+            responses = self.responsesCollect.find({"encuesta_id": encuesta_id})
+
+            all_responses = []
+            for response in responses:
+                preguntas = response.get("respuestas", [])
+                for pregunta in preguntas:
+                    pregunta_respuesta = {
+                        "encuesta_id": encuesta_id,
+                        "id_usuario": response.get("usuario_id", ""),
+                        "texto_pregunta": pregunta.get("texto_pregunta", ""),
+                        "respuesta": pregunta.get("respuesta", ""),
+                    }
+                    all_responses.append(pregunta_respuesta)
+
+            return all_responses
+        except Exception as e:
+            print(f"Error al obtener las respuestas: {str(e)}")
+            return None
+
+    # -------------------------------------------------------------- ANALISIS DE RESPUESTAS --------------------------------------------------------------
+    def generate_analysis(self, encuesta_id):
+        try:
+            # Obtener todas las respuestas para la encuesta especificada
+            respuestas = list(self.responsesCollect.find({"encuesta_id": encuesta_id}))
+
+            # Inicializar un diccionario para almacenar el análisis
+            analysis = {}
+
+            # Procesar cada respuesta para generar el análisis
+            for respuesta in respuestas:
+                preguntas = respuesta.get("respuestas", [])
+
+                for pregunta in preguntas:
+                    texto_pregunta = pregunta.get("texto_pregunta")
+                    respuesta_pregunta = pregunta.get("respuesta")
+
+                    # Verificar si la pregunta ya existe en el análisis
+                    if texto_pregunta in analysis:
+                        # Incrementar el contador de la respuesta existente
+                        if respuesta_pregunta in analysis[texto_pregunta]:
+                            analysis[texto_pregunta][respuesta_pregunta] += 1
+                        else:
+                            analysis[texto_pregunta][respuesta_pregunta] = 1
+                    else:
+                        # Agregar la pregunta al análisis y establecer el contador de la respuesta
+                        analysis[texto_pregunta] = {respuesta_pregunta: 1}
+
+            return True, analysis
+        except Exception as e:
+            print(f"Error al generar el análisis: {str(e)}")
+            return False, None
