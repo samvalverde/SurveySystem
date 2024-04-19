@@ -15,7 +15,7 @@ ENV DB_USER_MONGO=root
 ENV DB_PASSWORD_MONGO=password
 
 # Variables de entorno para redis
-ENV REDIS_HOST=localhost
+ENV REDIS_HOST=redis
 ENV REDIS_PORT=6379
 ENV REDIS_DB=0
 # Establece el directorio de trabajo en /opt/app

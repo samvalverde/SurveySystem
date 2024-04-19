@@ -13,7 +13,7 @@ class AppService:
     ):
         self.database = database
         self.mongo_database = mongo_database
-        self.redis_client = redis.StrictRedis(host="redis", port=6379, db=0)
+        self.redis_client = redis_client
 
     # seccion de usuarios
     def get_users(self):
