@@ -1,8 +1,7 @@
 from pymongo import MongoClient
-from bson import ObjectId
-import json
 
 
+# Clase para interactuar con la base de datos MongoDB
 class MongoDatabase:
     def __init__(self, mongoClient: MongoClient):
         self.client = mongoClient
@@ -107,30 +106,17 @@ class MongoDatabase:
 
     def update_question(self, encuesta_id, question_id, updated_question_data):
         try:
-            # Convertir la cadena JSON en un diccionario Python
-            updated_question_data = json.loads(updated_question_data)
+            # Convertir el question_id a un índice entero
+            question_index = int(question_id) - 1
 
-            # Obtener la lista de preguntas de la encuesta
-            questions = self.get_questions(encuesta_id)
+            # Actualizar el documento de la encuesta para modificar la pregunta
+            result = self.collection.update_one(
+                {"id_encuesta": encuesta_id},
+                {"$set": {f"preguntas.{question_index}": updated_question_data}},
+            )
 
-            # Convertir question_id a un índice entero
-            question_index = int(question_id)
-
-            # Verificar si el índice está dentro del rango de preguntas
-            if 0 <= question_index < len(questions):
-                # Actualizar la pregunta en la posición question_index
-                questions[question_index] = updated_question_data
-
-                # Actualizar las preguntas en la base de datos
-                result = self.collection.update_one(
-                    {"id_encuesta": encuesta_id}, {"$set": {"preguntas": questions}}
-                )
-
-                # Verificar si la actualización fue exitosa
-                return result.modified_count > 0
-            else:
-                print("Índice de pregunta fuera de rango")
-                return False
+            # Verificar si la actualización fue exitosa
+            return result.modified_count > 0
         except Exception as e:
             print(f"Error al actualizar la pregunta: {str(e)}")
             return False
@@ -138,7 +124,7 @@ class MongoDatabase:
     def delete_question(self, encuesta_id, question_id):
         try:
             # Convertir el question_id a un índice entero
-            question_index = int(question_id)
+            question_index = question_id - 1
 
             # Eliminar la pregunta del documento de la encuesta en la posición indicada
             result = self.collection.update_one(

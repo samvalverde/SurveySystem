@@ -8,7 +8,7 @@ class AppService:
         self.database = database
         self.mongo_database = mongo_database
 
-    # Métodos para la base de datos PostgreSQL
+    # seccion de usuarios
     def get_users(self):
         data = self.database.get_users()
         return data
@@ -33,7 +33,7 @@ class AppService:
         data = self.database.get_encuestassql()
         return data
 
-    # Métodos para la base de datos MongoDB
+    # seccion de encuestas
     def get_encuestas(self):
         data = self.mongo_database.get_encuestas()
         return data
@@ -61,6 +61,7 @@ class AppService:
         self.mongo_database.publish_encuesta(id)
         return id
 
+    # seccion de preguntas
     def add_question(self, survey_id, question_data):
         return self.mongo_database.add_question(survey_id, question_data)
 
@@ -74,3 +75,25 @@ class AppService:
 
     def delete_question(self, survey_id, question_id):
         return self.mongo_database.delete_question(survey_id, question_id)
+
+    # Seccion de encuestados
+
+    def get_respondents(self):
+        data = self.database.get_respondents()
+        return data
+
+    def get_respondent_by_ID(self, request_respondent_id):
+        data = self.database.get_respondent_by_ID(request_respondent_id)
+        return data
+
+    def create_respondent(self, respondent):
+        self.database.create_respondent(respondent)
+        return respondent
+
+    def update_respondent(self, request_respondent, request_respondent_id):
+        self.database.update_respondent(request_respondent, request_respondent_id)
+        return request_respondent
+
+    def delete_respondent(self, request_respondent_id):
+        self.database.delete_respondent(request_respondent_id)
+        return request_respondent_id

@@ -204,7 +204,7 @@ def publish_survey(id):
             403,
         )
     # Llama al método del servicio para publicar la encuesta
-    result = appService.publish_survey(id)
+    result = appService.publish_survey(str(id))
 
     if result:
         return jsonify({"message": "Encuesta publicada correctamente"}), 200
@@ -221,7 +221,7 @@ def add_question(id):
 
     request_data = request.get_json()
     # Llama al método del servicio para agregar la pregunta a la encuesta
-    result = appService.add_question(id, request_data)
+    result = appService.add_question(str(id), request_data)
 
     if result:
         return jsonify({"message": "Pregunta agregada correctamente"}), 201
@@ -232,7 +232,7 @@ def add_question(id):
 @app.route("/surveys/<int:id>/questions", methods=["GET"])
 def get_questions(id):
     # Llama al método del servicio para obtener todas las preguntas de la encuesta
-    questions = appService.get_questions(id)
+    questions = appService.get_questions(str(id))
     return jsonify(questions)
 
 
@@ -242,7 +242,7 @@ def update_question(id, questionId):
 
     request_data = request.get_json()
     # Llama al método del servicio para actualizar la pregunta de la encuesta
-    result = appService.update_question(id, questionId, request_data)
+    result = appService.update_question(str(id), int(questionId), request_data)
 
     if result:
         return jsonify({"message": "Pregunta actualizada correctamente"}), 200
@@ -255,9 +255,52 @@ def update_question(id, questionId):
 def delete_question(id, questionId):
 
     # Llama al método del servicio para eliminar la pregunta de la encuesta
-    result = appService.delete_question(id, questionId)
+    result = appService.delete_question(str(id), int(questionId))
 
     if result:
         return jsonify({"message": "Pregunta eliminada correctamente"}), 200
     else:
         return jsonify({"error": "Error al eliminar la pregunta"}), 500
+
+
+# ------------------------------------------------------------- ENCUESTADOS -------------------------------------------------------------
+@app.route("/respondents", methods=["POST"])
+def create_respondent():
+    request_data = request.get_json()
+    respondent = request_data
+    return appService.create_respondent(respondent)
+
+
+@app.route("/respondents")
+def respondents():
+    if not check_role(1):
+        return (
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
+            403,
+        )
+    return appService.get_respondents()
+
+
+@app.route("/respondents/<int:id>")
+def respondent_by_id(id):
+    return appService.get_respondent_by_ID(str(id))
+
+
+@app.route("/respondents/<int:id>", methods=["PUT"])
+def update_respondent(id):
+    verify_jwt_in_request()
+    # Obtener el ID del usuario actual desde el token JWT
+    current_respondent_id = get_jwt_identity()
+
+    # Verificar si el usuario tiene permiso para realizar la actualización
+    if not check_role(1) and current_respondent_id != id:
+        return jsonify({"error": "Usuario no autorizado para editar este perfil"}), 403
+
+    # Si pasó la verificación, proceder con la actualización del usuario
+    request_data = request.get_json()
+    return appService.update_respondent(request_data, str(id))
+
+
+@app.route("/respondents/<int:id>", methods=["DELETE"])
+def delete_respondent(id):
+    return appService.delete_respondent(str(id))
