@@ -11,7 +11,13 @@ ENV DB_PASSWORD_POSTGRES=mysecretpassword
 # Variables de entorno para la base de datos MongoDB
 ENV DB_HOST_MONGO=mongo
 ENV DB_PORT_MONGO=27017
+ENV DB_USER_MONGO=root
+ENV DB_PASSWORD_MONGO=password
 
+# Variables de entorno para redis
+ENV REDIS_HOST=localhost
+ENV REDIS_PORT=6379
+ENV REDIS_DB=0
 # Establece el directorio de trabajo en /opt/app
 WORKDIR /opt/app
 
