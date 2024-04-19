@@ -4,11 +4,11 @@ on:
   push:
     branches: 
       - devSam
-      - 'workflowbranch'
+      - workflowbranch
   pull_request:
     branches:
       - devSam
-      - 'workflowbranch'
+      - workflowbranch
 
 jobs:
 
@@ -68,5 +68,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
       
+    - name: Change to directory containing docker-compose.yml
+      run: cd ./python-flask-restapi/
+
     - name: Run docker-compose up
-      run: docker-compose up
+      run: docker-compose up -d
