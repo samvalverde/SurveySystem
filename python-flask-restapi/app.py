@@ -7,13 +7,14 @@ from dbMongo import MongoDatabase  # Importa la clase MongoDatabase
 from flask import Flask, request
 from pymongo import MongoClient
 
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_jwt_extended import (
     JWTManager,
     jwt_required,
     create_access_token,
     get_jwt_identity,
     verify_jwt_in_request,
+    unset_jwt_cookies,
 )
 
 
@@ -90,32 +91,17 @@ def create_user():
     return appService.create_user(user)
 
 
-def check_role(required_role):
-    try:
-        # Verificar que el token JWT esté presente en la solicitud
-        verify_jwt_in_request()
+def unset_jwt_cookies(response):
+    response.delete_cookie("access_token_cookie")
+    response.delete_cookie("refresh_token_cookie")
 
-        # Obtener la identidad del usuario desde el token JWT
-        current_user = get_jwt_identity()
 
-        # Consultar la base de datos para obtener el rol del usuario
-        cursor = db.conn.cursor()
-        cursor.execute(
-            f"SELECT IdTipoRole FROM Usuario WHERE Username = '{current_user}';"
-        )
-        user_role_id = cursor.fetchone()
-        cursor.close()
-
-        if user_role_id is None:
-            return False
-
-        # Verificar si el usuario tiene el rol requerido
-        return user_role_id[0] == required_role
-
-    except Exception as e:
-        # Manejar cualquier error que pueda ocurrir durante la verificación
-        print(f"Error durante la verificación de roles: {str(e)}")
-        return False
+@app.route("/auth/logout", methods=["GET"])
+@jwt_required()
+def logout():
+    response = make_response(jsonify({"message": "Logout exitoso"}), 200)
+    unset_jwt_cookies(response)
+    return response
 
 
 # --------------------------------------------------------------------------   USUARIOS   --------------------------------------------------------------------------
@@ -456,3 +442,31 @@ def generate_analysis(id):
     except Exception as e:
         print(f"Error en la solicitud GET /surveys/{id}/analysis: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
+
+
+def check_role(required_role):
+    try:
+        # Verificar que el token JWT esté presente en la solicitud
+        verify_jwt_in_request()
+
+        # Obtener la identidad del usuario desde el token JWT
+        current_user = get_jwt_identity()
+
+        # Consultar la base de datos para obtener el rol del usuario
+        cursor = db.conn.cursor()
+        cursor.execute(
+            f"SELECT IdTipoRole FROM Usuario WHERE Username = '{current_user}';"
+        )
+        user_role_id = cursor.fetchone()
+        cursor.close()
+
+        if user_role_id is None:
+            return False
+
+        # Verificar si el usuario tiene el rol requerido
+        return user_role_id[0] == required_role
+
+    except Exception as e:
+        # Manejar cualquier error que pueda ocurrir durante la verificación
+        print(f"Error durante la verificación de roles: {str(e)}")
+        return False
