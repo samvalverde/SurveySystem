@@ -131,6 +131,7 @@ def users():
 
 
 @app.route("/users/<int:id>")
+@jwt_required()
 def user_by_id(id):
     return appService.get_User_by_ID(str(id))
 
@@ -164,11 +165,13 @@ def delete_user(id):
 
 # --------------------------------------------------------------------------   ENCUESTAS    --------------------------------------------------------------------------
 @app.route("/surveys")
+@jwt_required()
 def encuestas():
     return appService.get_encuestas()  # solo las que tengan publicadas
 
 
 @app.route("/surveys/<int:id>")
+@jwt_required()
 def encuesta_by_id(id):
 
     result = appService.get_encuesta_by_ID(str(id))
@@ -183,7 +186,7 @@ def encuesta_by_id(id):
 def create_encuesta():
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no puede crear encuestas
 
@@ -205,7 +208,10 @@ def create_encuesta():
 def update_encuesta(id):
 
     if check_role(3):
-        return jsonify({"error": "Usuario no autorizado para crear encuestas"}), 403
+        return (
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
+            403,
+        )
 
     request_data = request.get_json()
     result = appService.update_encuesta(request_data, str(id))
@@ -221,7 +227,7 @@ def update_encuesta(id):
 def delete_encuesta(id):
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para borrar encuestas"}),
             403,
         )  # si no es admin ni creador no puede borrar encuestas
     return appService.delete_encuesta(str(id))
@@ -254,7 +260,7 @@ def publish_survey(id):
 def add_question(id):
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no puede
     request_data = request.get_json()
@@ -268,6 +274,7 @@ def add_question(id):
 
 
 @app.route("/surveys/<int:id>/questions", methods=["GET"])
+@jwt_required()
 def get_questions(id):
     # Llama al método del servicio para obtener todas las preguntas de la encuesta
     questions = appService.get_questions(str(id))
@@ -279,7 +286,7 @@ def get_questions(id):
 def update_question(id, questionId):
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no puede
     request_data = request.get_json()
@@ -297,7 +304,7 @@ def update_question(id, questionId):
 def delete_question(id, questionId):
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no
     # Llama al método del servicio para eliminar la pregunta de la encuesta
@@ -313,6 +320,7 @@ def delete_question(id, questionId):
 
 
 @app.route("/surveys/<string:id>/responses", methods=["POST"])
+@jwt_required()  # Requiere autenticación JWT
 def submit_response(id):
     try:
         respuesta = request.get_json()
@@ -341,7 +349,7 @@ def get_responses(id):
 
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no puede
 
@@ -365,6 +373,7 @@ def get_responses(id):
 
 # ------------------------------------------------------------- ENCUESTADOS -------------------------------------------------------------
 @app.route("/respondents", methods=["POST"])
+@jwt_required()
 def create_respondent():
     request_data = request.get_json()
     respondent = request_data
@@ -372,6 +381,7 @@ def create_respondent():
 
 
 @app.route("/respondents")
+@jwt_required()
 def respondents():
     if not check_role(1):
         return (
@@ -382,11 +392,18 @@ def respondents():
 
 
 @app.route("/respondents/<int:id>")
+@jwt_required()
 def respondent_by_id(id):
+    if not check_role(1):
+        return (
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
+            403,
+        )
     return appService.get_respondent_by_ID(str(id))
 
 
 @app.route("/respondents/<int:id>", methods=["PUT"])
+@jwt_required()
 def update_respondent(id):
     verify_jwt_in_request()
     # Obtener el ID del usuario actual desde el token JWT
@@ -402,7 +419,13 @@ def update_respondent(id):
 
 
 @app.route("/respondents/<int:id>", methods=["DELETE"])
+@jwt_required()
 def delete_respondent(id):
+    if not check_role(1):
+        return (
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
+            403,
+        )
     return appService.delete_respondent(str(id))
 
 
@@ -413,7 +436,7 @@ def generate_analysis(id):
 
     if check_role(3):
         return (
-            jsonify({"error": "Usuario no autorizado para crear encuestas"}),
+            jsonify({"error": "Usuario no autorizado para realizar esta acción"}),
             403,
         )  # si no es admin ni creador no puede crear encuestas
 
