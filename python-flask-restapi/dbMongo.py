@@ -1,54 +1,15 @@
-from pymongo import MongoClient
+# from pymongo import MongoClient
 
 
 # Clase para interactuar con la base de datos MongoDB
 class MongoDatabase:
-    def __init__(self, mongoClient: MongoClient):
+    def __init__(self, mongoClient):
         self.client = mongoClient
         self.database = self.client["EncuestasDB"]
         self.collection = self.database["encuestas"]
         self.responsesCollect = self.database["respuestas"]
 
-    def insert_encuesta(self, encuesta_data):
-        # Convertir ObjectId a una representación serializable si es necesario
-        self._convert_object_ids(encuesta_data)
-        self.collection.insert_one(encuesta_data)
-
-    def get_encuestas(self):
-        encuestas = list(self.collection.find())
-        # Convertir ObjectId a una representación serializable si es necesario
-        for encuesta in encuestas:
-            self._convert_object_ids(encuesta)
-        return encuestas
-
-    def get_encuesta_by_id(self, encuesta_id):
-        encuesta = self.collection.find_one({"id_encuesta": encuesta_id})
-
-        if encuesta:
-            # Convertir ObjectId a una representación serializable si es necesario
-            self._convert_object_ids(encuesta)
-
-        return encuesta
-
-    def update_encuesta(self, encuesta_id, updated_encuesta_data):
-        # Convertir ObjectId a una representación serializable si es necesario
-        self._convert_object_ids(updated_encuesta_data)
-
-        # Actualizar el documento de la encuesta
-        result = self.collection.update_one(
-            {"id_encuesta": encuesta_id}, {"$set": updated_encuesta_data}
-        )
-
-        # Verificar si la actualización fue exitosa
-        if result.modified_count > 0:
-            return updated_encuesta_data
-        else:
-            return None
-
-    def delete_encuesta(self, encuesta_id):
-        result = self.collection.delete_one({"id_encuesta": encuesta_id})
-        return result.deleted_count
-
+    # ------------------------------------------------------- FUNCIONES AUXILIARES -------------------------------------------------------
     def _convert_object_ids(self, data):
         # Convertir ObjectId a una representación serializable si es necesario
         if "_id" in data:
@@ -76,6 +37,47 @@ class MongoDatabase:
             print(f"Error al actualizar la encuesta: {str(e)}")
             return False
 
+    # ------------------------------------------------------- SECCION DE ENCUESTAS -------------------------------------------------------
+    def insert_encuesta(self, encuesta_data):
+        # Convertir ObjectId a una representación serializable si es necesario
+        self._convert_object_ids(encuesta_data)
+        self.collection.insert_one(encuesta_data)
+
+    def get_encuestas(self):
+        encuestas = list(self.collection.find({"publica": "True"}))
+        # Convertir ObjectId a una representación serializable si es necesario
+        for encuesta in encuestas:
+            self._convert_object_ids(encuesta)
+        return encuestas
+
+    def get_encuesta_by_id(self, encuesta_id):
+        encuesta = self.collection.find_one({"id_encuesta": encuesta_id})
+        if encuesta:
+            # Convertir ObjectId a una representación serializable si es necesario
+            self._convert_object_ids(encuesta)
+            return encuesta
+        else:
+            return False
+
+    def update_encuesta(self, encuesta_id, updated_encuesta_data):
+        # Convertir ObjectId a una representación serializable si es necesario
+        self._convert_object_ids(updated_encuesta_data)
+
+        # Actualizar el documento de la encuesta
+        result = self.collection.update_one(
+            {"id_encuesta": encuesta_id}, {"$set": updated_encuesta_data}
+        )
+
+        # Verificar si la actualización fue exitosa
+        if result.modified_count > 0:
+            return updated_encuesta_data
+        else:
+            return None
+
+    def delete_encuesta(self, encuesta_id):
+        result = self.collection.delete_one({"id_encuesta": encuesta_id})
+        return result.deleted_count
+
     def publish_encuesta(self, encuesta_id):
         try:
             # Llamar a update_encuesta_key para establecer publica en True
@@ -84,6 +86,7 @@ class MongoDatabase:
             print(f"Error al publicar la encuesta: {str(e)}")
             return False
 
+    # ------------------------------------------------------- SECCION DE PREGUNTAS -------------------------------------------------------
     def add_question(self, encuesta_id, question_data):
         try:
             # Actualizar el documento de la encuesta para agregar la pregunta
@@ -155,8 +158,10 @@ class MongoDatabase:
                 "usuario_id": usuario_id,
                 "respuestas": response_data,
             }
-            self.responsesCollect.insert_one(response)
-            return True
+            if self.responsesCollect.insert_one(response):
+                return True
+            else:
+                return False
         except Exception as e:
             print(f"Error al guardar la respuesta: {str(e)}")
             return False
@@ -167,13 +172,13 @@ class MongoDatabase:
 
             all_responses = []
             for response in responses:
-                preguntas = response.get("respuestas", [])
-                for pregunta in preguntas:
+                respuestas = response.get("respuestas", [])
+                for respuesta in respuestas:
                     pregunta_respuesta = {
                         "encuesta_id": encuesta_id,
                         "id_usuario": response.get("usuario_id", ""),
-                        "texto_pregunta": pregunta.get("texto_pregunta", ""),
-                        "respuesta": pregunta.get("respuesta", ""),
+                        "texto_pregunta": respuesta.get("texto_pregunta", ""),
+                        "respuesta": respuesta.get("respuesta", ""),
                     }
                     all_responses.append(pregunta_respuesta)
 
