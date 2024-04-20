@@ -54,6 +54,10 @@ class AppService:
         self.clear_cache("users")
         return request_user_id
 
+    def login_user(self, username, password):
+        data = self.database.login_user(username, password)
+        return data
+
     # seccion de encuestas
     def get_encuestas(self):
         cache_key = "encuestas"

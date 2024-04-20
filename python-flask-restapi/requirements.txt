@@ -3,3 +3,4 @@ python-dotenv
 poetry
 pymongo
 redis
+pytest

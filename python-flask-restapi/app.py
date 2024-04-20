@@ -1,19 +1,20 @@
 import json
 import os
 import redis
+import psycopg2
 from app_service import AppService
 from db import Database
 from dbMongo import MongoDatabase  # Importa la clase MongoDatabase
 from flask import Flask, request
 from pymongo import MongoClient
-
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, make_response
 from flask_jwt_extended import (
     JWTManager,
     jwt_required,
     create_access_token,
     get_jwt_identity,
     verify_jwt_in_request,
+    unset_jwt_cookies,
 )
 
 
@@ -25,9 +26,10 @@ DB_USER = os.getenv("DB_USER_POSTGRES")
 DB_PASSWORD = os.getenv("DB_PASSWORD_POSTGRES")
 
 # Inicializar la conexión a la base de datos PostgreSQL
-db = Database(
+conection = psycopg2.connect(
     database=DB_NAME, host=DB_HOST, user=DB_USER, password=DB_PASSWORD, port=DB_PORT
 )
+db = Database(conection)
 
 # Configuración de la base de datos MongoDB
 MONGO_HOST = os.getenv("DB_HOST_MONGO")
@@ -66,18 +68,9 @@ jwt = JWTManager(app)
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-
-    # Verificar si el usuario y la contraseña existen en la base de datos
-    cursor = db.conn.cursor()
-    cursor.execute(
-        f"SELECT * FROM Usuario WHERE Username = '{username}' AND Password = '{password}';"
-    )
-    user_data = cursor.fetchone()
-    cursor.close()
-
+    user_data = appService.login_user(username, password)
     if user_data is None:
         return jsonify({"error": "Credenciales inválidas"}), 401
-
     # Crear el token de acceso para el usuario autenticado
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token)
@@ -90,32 +83,17 @@ def create_user():
     return appService.create_user(user)
 
 
-def check_role(required_role):
-    try:
-        # Verificar que el token JWT esté presente en la solicitud
-        verify_jwt_in_request()
+def unset_jwt_cookies(response):
+    response.delete_cookie("access_token_cookie")
+    response.delete_cookie("refresh_token_cookie")
 
-        # Obtener la identidad del usuario desde el token JWT
-        current_user = get_jwt_identity()
 
-        # Consultar la base de datos para obtener el rol del usuario
-        cursor = db.conn.cursor()
-        cursor.execute(
-            f"SELECT IdTipoRole FROM Usuario WHERE Username = '{current_user}';"
-        )
-        user_role_id = cursor.fetchone()
-        cursor.close()
-
-        if user_role_id is None:
-            return False
-
-        # Verificar si el usuario tiene el rol requerido
-        return user_role_id[0] == required_role
-
-    except Exception as e:
-        # Manejar cualquier error que pueda ocurrir durante la verificación
-        print(f"Error durante la verificación de roles: {str(e)}")
-        return False
+@app.route("/auth/logout", methods=["GET"])
+@jwt_required()
+def logout():
+    response = make_response(jsonify({"message": "Logout exitoso"}), 200)
+    unset_jwt_cookies(response)
+    return response
 
 
 # --------------------------------------------------------------------------   USUARIOS   --------------------------------------------------------------------------
@@ -456,3 +434,31 @@ def generate_analysis(id):
     except Exception as e:
         print(f"Error en la solicitud GET /surveys/{id}/analysis: {str(e)}")
         return jsonify({"error": "Error interno del servidor"}), 500
+
+
+def check_role(required_role):
+    try:
+        # Verificar que el token JWT esté presente en la solicitud
+        verify_jwt_in_request()
+
+        # Obtener la identidad del usuario desde el token JWT
+        current_user = get_jwt_identity()
+
+        # Consultar la base de datos para obtener el rol del usuario
+        cursor = db.conn.cursor()
+        cursor.execute(
+            f"SELECT IdTipoRole FROM Usuario WHERE Username = '{current_user}';"
+        )
+        user_role_id = cursor.fetchone()
+        cursor.close()
+
+        if user_role_id is None:
+            return False
+
+        # Verificar si el usuario tiene el rol requerido
+        return user_role_id[0] == required_role
+
+    except Exception as e:
+        # Manejar cualquier error que pueda ocurrir durante la verificación
+        print(f"Error durante la verificación de roles: {str(e)}")
+        return False
