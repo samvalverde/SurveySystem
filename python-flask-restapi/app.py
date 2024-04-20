@@ -67,18 +67,9 @@ jwt = JWTManager(app)
 def login():
     username = request.json.get("username", None)
     password = request.json.get("password", None)
-
-    # Verificar si el usuario y la contraseña existen en la base de datos
-    cursor = db.conn.cursor()
-    cursor.execute(
-        f"SELECT * FROM Usuario WHERE Username = '{username}' AND Password = '{password}';"
-    )
-    user_data = cursor.fetchone()
-    cursor.close()
-
+    user_data = appService.login_user(username, password)
     if user_data is None:
         return jsonify({"error": "Credenciales inválidas"}), 401
-
     # Crear el token de acceso para el usuario autenticado
     access_token = create_access_token(identity=username)
     return jsonify(access_token=access_token)

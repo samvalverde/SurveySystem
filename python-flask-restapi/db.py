@@ -14,6 +14,15 @@ class Database:
             database=database, host=host, user=user, password=password, port=port
         )
 
+    def login_user(self, username, password):
+        cursor = self.conn.cursor()
+        cursor.execute(
+            f"SELECT * FROM Usuario WHERE Username = '{username}' AND Password = '{password}';"
+        )
+        data = cursor.fetchall()
+        cursor.close()
+        return data
+
     def get_users(self):
         cursor = self.conn.cursor()
         cursor.execute("SELECT * FROM Usuario;")
