@@ -15,7 +15,7 @@ class MongoDatabase:
         self.collection.insert_one(encuesta_data)
 
     def get_encuestas(self):
-        encuestas = list(self.collection.find())
+        encuestas = list(self.collection.find({"publica": "True"}))
         # Convertir ObjectId a una representación serializable si es necesario
         for encuesta in encuestas:
             self._convert_object_ids(encuesta)
@@ -23,12 +23,12 @@ class MongoDatabase:
 
     def get_encuesta_by_id(self, encuesta_id):
         encuesta = self.collection.find_one({"id_encuesta": encuesta_id})
-
         if encuesta:
             # Convertir ObjectId a una representación serializable si es necesario
             self._convert_object_ids(encuesta)
-
-        return encuesta
+            return encuesta
+        else:
+            return False
 
     def update_encuesta(self, encuesta_id, updated_encuesta_data):
         # Convertir ObjectId a una representación serializable si es necesario
