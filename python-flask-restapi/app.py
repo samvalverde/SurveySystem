@@ -1,12 +1,12 @@
 import json
 import os
 import redis
+import psycopg2
 from app_service import AppService
 from db import Database
 from dbMongo import MongoDatabase  # Importa la clase MongoDatabase
 from flask import Flask, request
 from pymongo import MongoClient
-
 from flask import Flask, jsonify, request, make_response
 from flask_jwt_extended import (
     JWTManager,
@@ -26,9 +26,10 @@ DB_USER = os.getenv("DB_USER_POSTGRES")
 DB_PASSWORD = os.getenv("DB_PASSWORD_POSTGRES")
 
 # Inicializar la conexión a la base de datos PostgreSQL
-db = Database(
+conection = psycopg2.connect(
     database=DB_NAME, host=DB_HOST, user=DB_USER, password=DB_PASSWORD, port=DB_PORT
 )
+db = Database(conection)
 
 # Configuración de la base de datos MongoDB
 MONGO_HOST = os.getenv("DB_HOST_MONGO")
