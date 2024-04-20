@@ -1,0 +1,65 @@
+name: Docker Image CI/CD
+
+on:
+  push:
+    branches: 
+    - 'main'
+    - 'devSam'
+  pull_request:
+    branches: 
+    - 'main'
+    - 'devSam'
+
+jobs:
+ 
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Run pytest
+      run: docker-compose run web poetry run pytest
+      
+  build-and-push:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ needs.test.result == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v1
+      
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v2
+      with:
+        context: .
+        file: ./python-flask-restapi/Dockerfile
+        push: true
+        tags: samvalverde/surveysystem:latest
+        
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v1
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: test
+    if: ${{ needs.test.result == 'success' }}
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+      
+    - name: Change to directory containing docker-compose.yml
+      run: cd ./python-flask-restapi/
+
+    - name: Run docker-compose up
+      run: docker-compose up -d
