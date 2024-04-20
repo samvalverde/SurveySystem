@@ -14,15 +14,15 @@ INSERT INTO Encuesta (Id, Nombre) VALUES
     (1, 'Encuesta de satisfacción')
   , (2, 'Encuesta de opinión');
 
-INSERT INTO EncuestaXUsuario (IdEncuesta, IdUsuario, FechaAsignacion) VALUES 
-    (1, 1, '2024-04-15')
-  , (2, 1, '2024-04-15');
+--INSERT INTO EncuestaXUsuario (IdEncuesta, IdUsuario, FechaAsignacion) VALUES 
+--    (1, 1, '2024-04-15')
+--  , (2, 1, '2024-04-15');
 
-INSERT INTO RespuestaEncuesta (IdEncuestaXUsuario, FechaRespuesta) VALUES 
-    (2, '2024-04-16');
+--INSERT INTO RespuestaEncuesta (IdEncuestaXUsuario, FechaRespuesta) VALUES 
+--    (2, '2024-04-16');
 
-UPDATE EncuestaXUsuario 
-SET Completada = 1
-WHERE IdEncuesta = 2;
+--UPDATE EncuestaXUsuario 
+--SET Completada = 1
+--WHERE IdEncuesta = 2;
 
 
