@@ -1,18 +1,9 @@
-import psycopg2
+# import psycopg2
 
 
 class Database:
-    def __init__(
-        self,
-        database="db_name",
-        host="db_host",
-        user="db_user",
-        password="db_pass",
-        port="db_port",
-    ):
-        self.conn = psycopg2.connect(
-            database=database, host=host, user=user, password=password, port=port
-        )
+    def __init__(self, conection):
+        self.conn = conection
 
     def login_user(self, username, password):
         cursor = self.conn.cursor()
