@@ -170,7 +170,12 @@ def encuestas():
 
 @app.route("/surveys/<int:id>")
 def encuesta_by_id(id):
-    return appService.get_encuesta_by_ID(str(id))
+
+    result = appService.get_encuesta_by_ID(str(id))
+    if result:
+        return result
+    else:
+        return jsonify({"error": "No existe una encuesta con este ID"}), 500
 
 
 @app.route("/surveys", methods=["POST"])
