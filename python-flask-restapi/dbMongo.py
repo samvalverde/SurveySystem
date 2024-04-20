@@ -9,11 +9,6 @@ class MongoDatabase:
         self.database = self.client["EncuestasDB"]
         self.collection = self.database["encuestas"]
 
-    def insert_encuesta(self, encuesta_data):
-        # Convertir ObjectId a una representación serializable si es necesario
-        self._convert_object_ids(encuesta_data)
-        self.collection.insert_one(encuesta_data)
-
     def get_encuestas(self):
         encuestas = list(self.collection.find())
         # Convertir ObjectId a una representación serializable si es necesario
@@ -37,12 +32,12 @@ class MongoDatabase:
         result = self.collection.delete_one({"id_encuesta": encuesta_id})
         return result.deleted_count
 
-    def _convert_object_ids(self, data):
+    def _convert_object_ids(self, data): ###
         # Convertir ObjectId a una representación serializable si es necesario
         if "_id" in data:
             data["_id"] = str(data["_id"])
 
-    def insert_pregunta(self, pregunta_data):
+    def insert_pregunta(self, pregunta_data): ###
         # Convertir ObjectId a una representación serializable si es necesario
         self._convert_object_ids(pregunta_data)
         self.collection.insert_one(pregunta_data)
@@ -60,7 +55,7 @@ class MongoDatabase:
         self._convert_object_ids(pregunta)
         return pregunta
 
-    def update_pregunta(self, pregunta_id, updated_pregunta_json):
+    def update_pregunta(self, pregunta_id, updated_pregunta_json): ###
         # Convierte el JSON a un diccionario
         updated_pregunta = json.loads(updated_pregunta_json)
         # Verifica que updated_pregunta sea un diccionario
@@ -75,7 +70,7 @@ class MongoDatabase:
             return updated_pregunta
         else:
             return "Error: El JSON proporcionado no es válido"
-
+    
     def delete_pregunta(self, encuesta_id, pregunta_id):
         result = self.collection.delete_one({"encuesta_id": encuesta_id, "pregunta_id": pregunta_id})
         return result.deleted_count

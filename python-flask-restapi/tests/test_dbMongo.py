@@ -1,11 +1,19 @@
-import json
 import pytest
 from unittest.mock import MagicMock
 from surveyService import SurveyService
+from mongomock import MongoClient
+
+'''
+client = MongoClient("mongo", 27017, username="root", password="password")
+mongo_db = MongoDatabase(client)
+'''
+
+# Hay que instanciar MongoDatabase para llamar a los metodos reales
+
 
 @pytest.fixture
 def mock_mongo_collection():
-    return MagicMock()
+    return MongoClient()['EncuestasDB']['encuestas']
 
 @pytest.fixture
 def survey_service(mock_mongo_collection):
@@ -35,8 +43,7 @@ def test_insert_encuesta(survey_service, mock_mongo_collection):
         ]
     }
     survey_service.insert_encuesta(encuesta_data)
-    mock_mongo_collection.insert_one.assert_called_once_with(encuesta_data)
+    assert mock_mongo_collection.count_documents({}) == 1
 
 def test_get_encuestas(survey_service, mock_mongo_collection):
-    survey_service.get_encuestas()
-    mock_mongo_collection.find.assert_called_once_with({})
+    assert survey_service.get_encuestas() == []
