@@ -3,11 +3,11 @@ name: Docker Image CI/CD
 on:
   push:
     branches:
-      - devCrisac
+      - devSam
 
   pull_request:
     branches:
-      - devCrisac
+      - devSam
 
 jobs:
   test:
