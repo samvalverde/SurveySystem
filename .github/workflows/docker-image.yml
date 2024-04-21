@@ -61,27 +61,27 @@ jobs:
       - name: Clean up Docker images
         run: docker image prune -f
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: ${{ needs.build-and-push.result == 'success' }}
-    # siu
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #deploy:
+    #runs-on: ubuntu-latest
+    #needs: build-and-push
+    #if: ${{ needs.build-and-push.result == 'success' }}
+    
+    #steps:
+      #- name: Checkout code
+        #uses: actions/checkout@v2
 
-      - name: Change to directory containing docker-compose.yml
-        run: cd ./python-flask-restapi/
+      #- name: Change to directory containing docker-compose.yml
+        #run: cd ./python-flask-restapi/
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT }}
+      #- name: Log in to GitHub Container Registry
+        #uses: docker/login-action@v2
+        #with:
+          #registry: ghcr.io
+          #username: ${{ github.actor }}
+          #password: ${{ secrets.GH_PAT }}
 
-      - name: Pull Docker image from GitHub Container Registry
-        run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
+      #- name: Pull Docker image from GitHub Container Registry
+        #run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
 
-      - name: Run docker-compose up
-        run: docker-compose up -d
+      #- name: Run docker-compose up
+        #run: docker-compose up -d
