@@ -1,13 +1,13 @@
-name: main
+name: Docker Image CI/CD
 
 on:
   push:
     branches:
-      - devCrisac
+      - main
 
   pull_request:
     branches:
-      - devCrisac
+      - main
 
 jobs:
   test:
@@ -45,6 +45,13 @@ jobs:
       - name: Build Docker image
         run: docker build -t samvalverde/surveysystem:latest ./python-flask-restapi/
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }} # Use the newly created secret
+
       - name: Tag Docker image for GitHub Container Registry
         run: docker tag samvalverde/surveysystem:latest ghcr.io/${{ github.repository_owner }}/surveysystem:latest
 
@@ -54,27 +61,27 @@ jobs:
       - name: Clean up Docker images
         run: docker image prune -f
 
-  deploy:
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: ${{ needs.build-and-push.result == 'success' }}
+  #deploy:
+  #runs-on: ubuntu-latest
+  #needs: build-and-push
+  #if: ${{ needs.build-and-push.result == 'success' }}
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+  #steps:
+  #- name: Checkout code
+  #uses: actions/checkout@v2
 
-      - name: Change to directory containing docker-compose.yml
-        run: cd ./python-flask-restapi/
+  #- name: Change to directory containing docker-compose.yml
+  #run: cd ./python-flask-restapi/
 
-      - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v2
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT }}
+  #- name: Log in to GitHub Container Registry
+  #uses: docker/login-action@v2
+  #with:
+  #registry: ghcr.io
+  #username: ${{ github.actor }}
+  #password: ${{ secrets.GH_PAT }}
 
-      - name: Pull Docker image from GitHub Container Registry
-        run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
+  #- name: Pull Docker image from GitHub Container Registry
+  #run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
 
-      - name: Run docker-compose up
-        run: docker-compose up -d
+  #- name: Run docker-compose up
+  #run: docker-compose up -d
