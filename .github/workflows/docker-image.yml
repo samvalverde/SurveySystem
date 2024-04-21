@@ -45,6 +45,13 @@ jobs:
       - name: Build Docker image
         run: docker build -t samvalverde/surveysystem:latest ./python-flask-restapi/
 
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PAT }}  # Use the newly created secret
+
       - name: Tag Docker image for GitHub Container Registry
         run: docker tag samvalverde/surveysystem:latest ghcr.io/${{ github.repository_owner }}/surveysystem:latest
 
