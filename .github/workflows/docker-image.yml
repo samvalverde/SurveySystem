@@ -2,12 +2,10 @@ name: Docker Image CI/CD
 
 on:
   push:
-    branches: 
-    - 'devSam'
+    branches: ['devSam']
   
   pull_request:
-    branches: 
-    - 'devSam'
+    branches: ['devSam']
 
 jobs:
  
