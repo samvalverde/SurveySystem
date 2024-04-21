@@ -2,10 +2,14 @@ name: Docker Image CI/CD
 
 on:
   push:
-    branches: ['devSam']
+    branches:
+      - 'main'
+      - 'devSam'
   
   pull_request:
-    branches: ['devSam']
+    branches:
+      - 'main'
+      - 'devSam'
 
 jobs:
  
@@ -42,6 +46,7 @@ jobs:
       
     - name: Clean up Docker images
       run: docker image prune -f
+      ###
           
   deploy:
     runs-on: ubuntu-latest
