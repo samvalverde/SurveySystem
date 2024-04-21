@@ -55,7 +55,7 @@ jobs:
           tags: ${{ github.repository }} # lowercase ??
       
       - name: Tag Docker image for GitHub Container Registry
-        run: docker tag samvalverde/surveysystem:latest ghcr.io/${{ github.repository_owner }}/surveysystem:latest
+        run: docker tag samvalverde/SurveySystem:latest ghcr.io/${{ github.repository_owner }}/SurveySystem:latest
       
       - name: Push Docker image to GitHub Container Registry
         run: docker push ghcr.io/${{ github.repository_owner }}/surveysystem:latest
