@@ -4,13 +4,11 @@ on:
   push:
     branches:
       - main
-      - devSam
       - devCrisac
   
   pull_request:
     branches:
       - main
-      - devSam
       - devCrisac
 
 jobs:
