@@ -81,7 +81,7 @@ class MongoDatabase:
     def publish_encuesta(self, encuesta_id):
         try:
             # Llamar a update_encuesta_key para establecer publica en True
-            return self.update_encuesta_key(encuesta_id, "publica", True)
+            return self.update_encuesta_key(encuesta_id, "publica", "True")
         except Exception as e:
             print(f"Error al publicar la encuesta: {str(e)}")
             return False
