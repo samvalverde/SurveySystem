@@ -8,6 +8,7 @@ class MongoDatabase:
         self.database = self.client["EncuestasDB"]
         self.collection = self.database["encuestas"]
         self.responsesCollect = self.database["respuestas"]
+        self.temp_changes_collection = self.database["temp_changes"]
 
     # ------------------------------------------------------- FUNCIONES AUXILIARES -------------------------------------------------------
     def _convert_object_ids(self, data):
