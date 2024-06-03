@@ -18,6 +18,11 @@ ENV DB_PASSWORD_MONGO=password
 ENV REDIS_HOST=redis
 ENV REDIS_PORT=6379
 ENV REDIS_DB=0
+
+# Variables de entorno para kafka
+#ENV KAFKA_BROKER_URL=localhost:9092
+#ENV KAFKA_LISTENERS=PLAINTEXT://localhost:9092
+#ENV KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://localhost:9092
 # Establece el directorio de trabajo en /opt/app
 WORKDIR /opt/app
 

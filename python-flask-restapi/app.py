@@ -17,6 +17,11 @@ from flask_jwt_extended import (
     unset_jwt_cookies,
 )
 
+# Importa el módulo KafkaProducer
+from kafka import KafkaConsumer, KafkaProducer, KafkaAdminClient
+from kafka.admin import NewTopic
+from kafka.errors import KafkaError
+from threading import Thread
 
 # Configuración de la base de datos PostgreSQL
 DB_HOST = os.getenv("DB_HOST_POSTGRES")  # Corrección aquí
@@ -54,11 +59,62 @@ redis_client = redis.StrictRedis(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB)
 # Inicializar la instancia de AppService con ambas conexiones de base de datos
 appService = AppService(db, mongo_db, redis_client)
 
+# Configuración de Kafka
+KAFKA_BROKER_URL = os.getenv("KAFKA_BROKER_URL")
+TOPIC_ENCUESTA_EDICION = "encuesta_edicion"
 
 # ------------------------------------------------------------------- Inicializar la aplicación Flask -------------------------------------------------------------------
 app = Flask(__name__)
 app.config["JWT_SECRET_KEY"] = "1234"  # Cambia esto por tu clave secreta
 jwt = JWTManager(app)
+
+
+# -------------------------------------------------------------------------- Endpoints KAFKA --------------------------------------------------------------------------
+@app.route("/surveys/<int:id>/edit/start", methods=["POST"])
+@jwt_required()
+def start_edit_session(id):
+    # Start the edit session
+    success, message = appService.start_edit_session(id)
+    if success:
+        return jsonify({"status": message}), 201
+    else:
+        return jsonify({"error": message}), 400
+
+
+@app.route("/surveys/<int:id>/edit/save", methods=["POST"])
+@jwt_required()
+def save_edit_changes(id):
+    try:
+        request_data = request.get_json()
+        appService.send_changes_to_kafka(request_data)
+        return jsonify({"message": "Cambios guardados en Kafka exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/surveys/<int:id>/edit/submit", methods=["POST"])
+@jwt_required()
+def submit_edit_changes(id):
+    try:
+        appService.submit_changes(id)
+        return jsonify({"message": "Cambios enviados exitosamente"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# Endpoint: Get edit session status
+@app.route("/surveys/<int:id>/edit/status", methods=["GET"])
+@jwt_required()
+def get_edit_session_status(id):
+    # Check if the topic exists in Kafka
+    topic_list = appService.kafka_admin_client.list_topics()
+    if str(id) not in topic_list:
+        return jsonify({"status": "Primero debe crearse una sesión"}), 400
+
+    # Get the status from the AppService
+    status = appService.get_edit_session_status(str(id))
+    return jsonify({"status": status}), 200
+
 
 # ------------------------------------------------------------- Autenticación y Autorización -------------------------------------------------------------
 

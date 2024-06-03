@@ -3,11 +3,11 @@ name: Docker Image CI/CD
 on:
   push:
     branches:
-      - devSam
+      - main
 
   pull_request:
     branches:
-      - devSam
+      - main
 
 jobs:
   test:
@@ -50,7 +50,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_PAT }}  # Use the newly created secret
+          password: ${{ secrets.GH_PAT }} # Use the newly created secret
 
       - name: Tag Docker image for GitHub Container Registry
         run: docker tag samvalverde/surveysystem:latest ghcr.io/${{ github.repository_owner }}/surveysystem:latest
@@ -62,26 +62,26 @@ jobs:
         run: docker image prune -f
 
   #deploy:
-    #runs-on: ubuntu-latest
-    #needs: build-and-push
-    #if: ${{ needs.build-and-push.result == 'success' }}
-    
-    #steps:
-      #- name: Checkout code
-        #uses: actions/checkout@v2
+  #runs-on: ubuntu-latest
+  #needs: build-and-push
+  #if: ${{ needs.build-and-push.result == 'success' }}
 
-      #- name: Change to directory containing docker-compose.yml
-        #run: cd ./python-flask-restapi/
+  #steps:
+  #- name: Checkout code
+  #uses: actions/checkout@v2
 
-      #- name: Log in to GitHub Container Registry
-        #uses: docker/login-action@v2
-        #with:
-          #registry: ghcr.io
-          #username: ${{ github.actor }}
-          #password: ${{ secrets.GH_PAT }}
+  #- name: Change to directory containing docker-compose.yml
+  #run: cd ./python-flask-restapi/
 
-      #- name: Pull Docker image from GitHub Container Registry
-        #run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
+  #- name: Log in to GitHub Container Registry
+  #uses: docker/login-action@v2
+  #with:
+  #registry: ghcr.io
+  #username: ${{ github.actor }}
+  #password: ${{ secrets.GH_PAT }}
 
-      #- name: Run docker-compose up
-        #run: docker-compose up -d
+  #- name: Pull Docker image from GitHub Container Registry
+  #run: docker pull ghcr.io/${{ github.repository_owner }}/surveysystem:latest
+
+  #- name: Run docker-compose up
+  #run: docker-compose up -d

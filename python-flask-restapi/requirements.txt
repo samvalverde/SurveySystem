@@ -4,3 +4,5 @@ poetry
 pymongo
 redis
 pytest
+flask_sqlalchemy
+kafka-python
