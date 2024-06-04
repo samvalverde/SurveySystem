@@ -78,15 +78,48 @@ services:
       - ./database/:/docker-entrypoint-initdb.d/
 
   neo4j:
-    image: neo4j:4.4
-    restart: always
+    image: neo4j:latest
     ports:
-      - 7474:7474
-      - 7687:7687
+      - "7474:7474"
+      - "7687:7687"
     networks:
       - web
     environment:
-      NEO4J_AUTH: neo4j/password
+      - NEO4J_AUTH=neo4j/password
+
+  spark:
+      image: bitnami/spark:latest
+      environment:
+        - SPARK_MODE=master
+      ports:
+        - "7077:7077"
+        - "8080:8080"
+      networks:
+        - web
+
+  spark-worker:
+    image: bitnami/spark:latest
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark:7077
+    networks:
+      - web
+    depends_on:
+      - spark
+
+  surveyanalytics:
+    build: 
+      context: ./streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./streamlit:/SurveyAnalytics
+    networks:
+      - web
+    depends_on:
+      - spark
+      #  - neo4j
+    #command: ["poetry", "run", "streamlit", "run", "SurveyAnalytics.py"]
 
 networks:
   web:

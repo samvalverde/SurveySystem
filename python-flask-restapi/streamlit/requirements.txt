@@ -4,5 +4,8 @@ poetry
 pymongo
 redis
 pytest
-flask_sqlalchemy
 kafka-python
+streamlit 
+neo4j
+pyspark
+pandas  

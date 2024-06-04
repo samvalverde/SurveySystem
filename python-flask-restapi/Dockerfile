@@ -29,11 +29,17 @@ WORKDIR /opt/app
 # Copia los archivos de la aplicación al contenedor
 COPY . .
 
-# Instala Poetry y las dependencias del proyecto
-RUN pip install poetry && poetry install
+# Install Poetry
+RUN pip install poetry
+
+# Install dependencies
+RUN poetry install
 
 # Expone el puerto 5000 para la aplicación Flask
 EXPOSE 5000
+
+# Expose the Streamlit port
+EXPOSE 8501
 
 # Comando para iniciar la aplicación Flask
 CMD ["poetry", "run", "python", "-m", "flask", "run", "--host=0.0.0.0"]
