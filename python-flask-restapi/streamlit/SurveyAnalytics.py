@@ -15,6 +15,13 @@ def main():
         .master("spark://spark:7077")
         .getOrCreate()
     )
+
+    # Example DataFrame for Spark
+    data = [("Alice", 1), ("Bob", 2), ("Cathy", 3)]
+    df = spark.createDataFrame(data, ["Name", "Value"])
+    st.write("Example DataFrame using Spark:")
+    st.dataframe(df.toPandas())
+
     # Initialize Neo4j
     neo4j_uri = "bolt://neo4j:7687"
     neo4j_user = "neo4j"
@@ -28,12 +35,6 @@ def main():
         result = session.run("MATCH (n) RETURN n LIMIT 5")
         nodes = result.data()
         st.write("Nodes in Neo4j:", nodes)
-
-    # Example DataFrame for Spark
-    data = [("Alice", 1), ("Bob", 2), ("Cathy", 3)]
-    df = spark.createDataFrame(data, ["Name", "Value"])
-    st.write("Example DataFrame using Spark:")
-    st.write(df.show())
 
 
 if __name__ == "__main__":
