@@ -1,0 +1,11 @@
+flask
+python-dotenv
+poetry
+pymongo
+redis
+pytest
+kafka-python
+streamlit 
+neo4j
+pyspark
+pandas  

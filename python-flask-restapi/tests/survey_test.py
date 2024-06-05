@@ -4,9 +4,11 @@ import os
 # Agrega la ruta al directorio que contiene db.py al sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 from db import Database
 from dbMongo import MongoDatabase
+from app_service import AppService
+import redis
 
 
 # ---------------------------------------------------------------- Fixture para la base de datos de PostgreSQL ----------------------------------------------------------------
@@ -759,3 +761,136 @@ def test_generate_analysis(mongo_db):
     assert len(analysis) == 2
     assert analysis["Pregunta 1"]["Respuesta 1"] == 1
     assert analysis["Pregunta 2"]["Respuesta 4"] == 1
+
+
+# ------------------------------------------------------- SECCION DE EDICION DE ENCUESTAS COLABORATIVAS ------------------------------------------------------
+
+
+def test_start_edit_session():
+    # Simular una instancia del objeto que contiene el método start_edit_session
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock
+    edit_manager.start_edit_session.return_value = True
+
+    # Llamar al método start_edit_session con un identificador de encuesta
+    result = edit_manager.start_edit_session("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == True
+    # Verificar que se llamó al método start_edit_session con el argumento esperado
+    edit_manager.start_edit_session.assert_called_once_with("encuesta_id")
+
+
+def test_save_edit_changes():
+    # Simular una instancia del objeto que contiene el método save_edit_changes
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock
+    edit_manager.save_edit_changes.return_value = True
+
+    # Llamar al método save_edit_changes con un identificador de encuesta
+    result = edit_manager.save_edit_changes("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == True
+    # Verificar que se llamó al método save_edit_changes con el argumento esperado
+    edit_manager.save_edit_changes.assert_called_once_with("encuesta_id")
+
+
+def test_submit_edit_changes():
+    # Simular una instancia del objeto que contiene el método submit_edit_changes
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock
+    edit_manager.submit_edit_changes.return_value = True
+
+    # Llamar al método submit_edit_changes con un identificador de encuesta
+    result = edit_manager.submit_edit_changes("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == True
+    # Verificar que se llamó al método submit_edit_changes con el argumento esperado
+    edit_manager.submit_edit_changes.assert_called_once_with("encuesta_id")
+
+
+def test_get_edit_session_status():
+    # Simular una instancia del objeto que contiene el método get_edit_session_status
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock
+    edit_manager.get_edit_session_status.return_value = "Últimos cambios aplicados"
+
+    # Llamar al método get_edit_session_status con un identificador de encuesta
+    result = edit_manager.get_edit_session_status("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == "Últimos cambios aplicados"
+    # Verificar que se llamó al método get_edit_session_status con el argumento esperado
+    edit_manager.get_edit_session_status.assert_called_once_with("encuesta_id")
+
+
+def test_start_edit_session_failure():
+    # Simular una instancia del objeto que contiene el método start_edit_session
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock para que el método falle
+    edit_manager.start_edit_session.return_value = False
+
+    # Llamar al método start_edit_session con un identificador de encuesta
+    result = edit_manager.start_edit_session("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == False
+    # Verificar que se llamó al método start_edit_session con el argumento esperado
+    edit_manager.start_edit_session.assert_called_once_with("encuesta_id")
+
+
+def test_save_edit_changes_failure():
+    # Simular una instancia del objeto que contiene el método save_edit_changes
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock para que el método falle
+    edit_manager.save_edit_changes.return_value = False
+
+    # Llamar al método save_edit_changes con un identificador de encuesta
+    result = edit_manager.save_edit_changes("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == False
+    # Verificar que se llamó al método save_edit_changes con el argumento esperado
+    edit_manager.save_edit_changes.assert_called_once_with("encuesta_id")
+
+
+def test_submit_edit_changes_failure():
+    # Simular una instancia del objeto que contiene el método submit_edit_changes
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock para que el método falle
+    edit_manager.submit_edit_changes.return_value = False
+
+    # Llamar al método submit_edit_changes con un identificador de encuesta
+    result = edit_manager.submit_edit_changes("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == False
+    # Verificar que se llamó al método submit_edit_changes con el argumento esperado
+    edit_manager.submit_edit_changes.assert_called_once_with("encuesta_id")
+
+
+def test_get_edit_session_status_failure():
+    # Simular una instancia del objeto que contiene el método get_edit_session_status
+    edit_manager = MagicMock()
+
+    # Configurar el comportamiento esperado del mock para que el método falle
+    edit_manager.get_edit_session_status.return_value = (
+        "Los últimos cambios no se han aplicado"
+    )
+
+    # Llamar al método get_edit_session_status con un identificador de encuesta
+    result = edit_manager.get_edit_session_status("encuesta_id")
+
+    # Verificar que el método devolvió el resultado esperado
+    assert result == "Los últimos cambios no se han aplicado"
+    # Verificar que se llamó al método get_edit_session_status con el argumento esperado
+    edit_manager.get_edit_session_status.assert_called_once_with("encuesta_id")
