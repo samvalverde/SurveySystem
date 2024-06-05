@@ -52,6 +52,8 @@ services:
       DB_PASSWORD: mysecretpassword
       MONGO_HOST: mongo
       MONGO_PORT: 27017
+      NEO4J_HOST: neo4j
+      NEO4J_PORT: 7687
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - 5002:5000
@@ -60,6 +62,7 @@ services:
     depends_on:
       - db
       - mongo
+      - neo4j
       - kafka
     volumes:
       - .:/opt/app
