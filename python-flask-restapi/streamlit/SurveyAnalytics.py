@@ -3,6 +3,9 @@ import time
 import streamlit as st
 from pyspark.sql import SparkSession
 from neo4j import GraphDatabase
+from pyvis.network import Network
+import plotly.express as px
+import pandas as pd
 
 def create_nodes_and_relationships(driver, data_encuestas, data_respuestas):
     def create_encuesta(tx, id_encuesta, titulo_encuesta):
@@ -52,13 +55,40 @@ def create_nodes_and_relationships(driver, data_encuestas, data_respuestas):
 
         for respuesta_doc in data_respuestas:
             usuario_id = respuesta_doc["usuario_id"]
-            id_encuesta = respuesta_doc["encuesta_id"]
             session.write_transaction(create_usuario, usuario_id)
 
             for respuesta in respuesta_doc["respuestas"]:
                 texto_pregunta = respuesta["texto_pregunta"]
                 respuesta_value = respuesta["respuesta"]
                 session.write_transaction(create_respuesta, usuario_id, texto_pregunta, respuesta_value)
+
+def draw_network_graph(data_encuestas, data_respuestas):
+    net = Network(height='750px', width='100%', directed=True)
+    
+    for encuesta in data_encuestas:
+        id_encuesta = encuesta['id_encuesta']
+        titulo_encuesta = encuesta['titulo_encuesta']
+        net.add_node(id_encuesta, label=titulo_encuesta, title=titulo_encuesta, shape='box')
+
+        for pregunta in encuesta['preguntas']:
+            texto_pregunta = pregunta['texto_pregunta']
+            tipo_pregunta = pregunta['tipo_pregunta']
+            net.add_node(texto_pregunta, label=texto_pregunta, title=tipo_pregunta, shape='ellipse')
+            net.add_edge(id_encuesta, texto_pregunta, title='TIENE_PREGUNTA')
+
+    for respuesta_doc in data_respuestas:
+        usuario_id = respuesta_doc['usuario_id']
+        net.add_node(usuario_id, label=f'Usuario {usuario_id}', shape='dot')
+
+        for respuesta in respuesta_doc['respuestas']:
+            texto_pregunta = respuesta['texto_pregunta']
+            respuesta_value = respuesta['respuesta']
+            respuesta_node = f'{usuario_id}_{texto_pregunta}_{respuesta_value}'
+            net.add_node(respuesta_node, label=respuesta_value, shape='diamond')
+            net.add_edge(usuario_id, respuesta_node, title='RESPONDIO')
+            net.add_edge(respuesta_node, texto_pregunta, title='ES_PREGUNTA_DE')
+
+    return net
 
 def main():
     st.title("Survey Analytics")
@@ -92,6 +122,10 @@ def main():
     data_encuestas = df_encuestas.collect()
     data_respuestas = df_respuestas.collect()
 
+    # Convert to dictionary for easier processing
+    data_encuestas = [row.asDict() for row in data_encuestas]
+    data_respuestas = [row.asDict() for row in data_respuestas]
+
     # Display the data in Streamlit
     st.write("Data from MongoDB (Encuestas):")
     st.dataframe(df_encuestas.toPandas())
@@ -121,6 +155,13 @@ def main():
     create_nodes_and_relationships(driver, data_encuestas, data_respuestas)
 
     st.write("Nodes and relationships created in Neo4j.")
+
+    # Draw the network graph
+    net = draw_network_graph(data_encuestas, data_respuestas)
+    net.show('network.html')
+    with open('network.html', 'r', encoding='utf-8') as f:
+        html = f.read()
+    st.components.v1.html(html, height=750)
 
 if __name__ == "__main__":
     main()

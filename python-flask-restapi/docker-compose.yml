@@ -89,29 +89,30 @@ services:
     environment:
       NEO4J_AUTH: neo4j/password
 
-  spark:
-    image: bitnami/spark:latest
+  spark-master:
+    image: bitnami/spark:3.1.2
     environment:
       - SPARK_MODE=master
+      - SPARK_MASTER_HOST=spark-master
     ports:
       - "7077:7077"
       - "8080:8080"
     networks:
       - web
     volumes:
-      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
+      - /path/to/spark/jars:/opt/bitnami/spark/jars
 
   spark-worker:
-    image: bitnami/spark:latest
+    image: bitnami/spark:3.1.2
     environment:
       - SPARK_MODE=worker
-      - SPARK_MASTER_URL=spark://spark:7077
+      - SPARK_MASTER_URL=spark://spark-master:7077
     networks:
       - web
     depends_on:
-      - spark
+      - spark-master
     volumes:
-      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
+      - /path/to/spark/jars:/opt/bitnami/spark/jars
 
   surveyanalytics:
     build:
@@ -123,7 +124,8 @@ services:
     networks:
       - web
     depends_on:
-      - spark
+      - spark-master
+      - spark-worker
       - mongo
       - neo4j
     command: ["streamlit", "run", "SurveyAnalytics.py"]
