@@ -87,17 +87,19 @@ services:
     networks:
       - web
     environment:
-      - NEO4J_AUTH=neo4j/password
+      NEO4J_AUTH: neo4j/password
 
   spark:
-      image: bitnami/spark:latest
-      environment:
-        - SPARK_MODE=master
-      ports:
-        - "7077:7077"
-        - "8080:8080"
-      networks:
-        - web
+    image: bitnami/spark:latest
+    environment:
+      - SPARK_MODE=master
+    ports:
+      - "7077:7077"
+      - "8080:8080"
+    networks:
+      - web
+    volumes:
+      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
 
   spark-worker:
     image: bitnami/spark:latest
@@ -108,9 +110,11 @@ services:
       - web
     depends_on:
       - spark
+    volumes:
+      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
 
   surveyanalytics:
-    build: 
+    build:
       context: ./streamlit
     ports:
       - "8501:8501"
@@ -120,8 +124,9 @@ services:
       - web
     depends_on:
       - spark
-      #  - neo4j
-    #command: ["poetry", "run", "streamlit", "run", "SurveyAnalytics.py"]
+      - mongo
+      - neo4j
+    command: ["streamlit", "run", "SurveyAnalytics.py"]
 
 networks:
   web:

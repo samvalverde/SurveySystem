@@ -1,9 +1,9 @@
 import os
+import time
 import streamlit as st
 from pyspark.sql import SparkSession
 from neo4j import GraphDatabase
 
-# La función itera sobre los datos de encuestas y respuestas, y utiliza transacciones para crear los nodos y relaciones.
 def create_nodes_and_relationships(driver, data_encuestas, data_respuestas):
     def create_encuesta(tx, id_encuesta, titulo_encuesta):
         query = """
@@ -64,12 +64,27 @@ def main():
     st.title("Survey Analytics")
 
     # Initialize Spark
-    spark = (
-        SparkSession.builder.appName("SurveyAnalytics")
-        .master("spark://spark:7077")
-        .config("spark.mongodb.input.uri", "mongodb://root:password@mongo:27017/EncuestasDB.encuestas")
-        .getOrCreate()
-    )
+    spark = None
+    for attempt in range(5):  # Retry up to 5 times
+        try:
+            spark = (
+                SparkSession.builder.appName("SurveyAnalytics")
+                .master("spark://spark:7077")
+                .config("spark.jars.packages", "org.mongodb.spark:mongo-spark-connector_2.12:10.0.0")
+                .config("spark.mongodb.input.uri", "mongodb://mongo:27017/EncuestasDB")
+                .config("spark.mongodb.output.uri", "mongodb://mongo:27017/EncuestasDB")
+                .config("spark.mongodb.input.database", "EncuestasDB")
+                .config("spark.mongodb.output.database", "EncuestasDB")
+                .getOrCreate()
+            )
+            break
+        except Exception as e:
+            st.error(f"Failed to initialize Spark (attempt {attempt+1}/5): {e}")
+            time.sleep(5)
+
+    if spark is None:
+        st.error("Could not initialize Spark. Exiting.")
+        return
 
     # Load data from MongoDB
     df_encuestas = spark.read.format("mongo").option("collection", "encuestas").load()
@@ -85,9 +100,20 @@ def main():
 
     # Initialize Neo4j
     neo4j_uri = "bolt://neo4j:7687"
-    neo4j_user = os.getenv("NEO4J_USER")
-    neo4j_password = os.getenv("NEO4J_PASSWORD")
-    driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
+    neo4j_user = os.getenv("NEO4J_USER", "neo4j")
+    neo4j_password = os.getenv("NEO4J_PASSWORD", "password")
+    driver = None
+    for attempt in range(5):  # Retry up to 5 times
+        try:
+            driver = GraphDatabase.driver(neo4j_uri, auth=(neo4j_user, neo4j_password))
+            break
+        except Exception as e:
+            st.error(f"Failed to connect to Neo4j (attempt {attempt+1}/5): {e}")
+            time.sleep(5)
+
+    if driver is None:
+        st.error("Could not connect to Neo4j. Exiting.")
+        return
 
     st.write("Neo4j and Spark initialized.")
 
