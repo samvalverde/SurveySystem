@@ -98,8 +98,6 @@ services:
       - "8080:8080"
     networks:
       - web
-    volumes:
-      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
 
   spark-worker:
     image: bitnami/spark:latest
@@ -110,8 +108,6 @@ services:
       - web
     depends_on:
       - spark
-    volumes:
-      - /path/to/spark/jars:/opt/bitnami/spark/jars # Mount local jars
 
   surveyanalytics:
     build:
