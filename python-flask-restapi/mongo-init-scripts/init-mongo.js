@@ -93,4 +93,34 @@ db.respuestas.insertMany([{
         },
       ],
     },
+    {
+      encuesta_id: "1",
+      usuario_id: "2",
+      respuestas: [
+        {
+        pregunta_num: "1",
+        texto_pregunta: "¿Cómo calificarías nuestro servicio?",
+        respuesta: "Bueno",
+        },{
+          pregunta_num: "2",
+          texto_pregunta: "¿Recomendarías nuestro producto?",
+          respuesta: "No",
+          },
+        ]
+      },
+      {
+        encuesta_id: "1",
+        usuario_id: "3",
+        respuestas: [
+          {
+          pregunta_num: "1",
+          texto_pregunta: "¿Cómo calificarías nuestro servicio?",
+          respuesta: "Muy bueno",
+          },{
+            pregunta_num: "2",
+            texto_pregunta: "¿Recomendarías nuestro producto?",
+            respuesta: "Sí",
+            },
+          ]
+        },
 ]);

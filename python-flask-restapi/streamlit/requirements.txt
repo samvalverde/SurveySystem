@@ -9,4 +9,6 @@ streamlit
 neo4j
 pyspark
 pandas
-pyvis  
+networkx 
+plotly
+streamlit-autorefresh==1.0.1 

@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.1'
 
 services:
   mongo:
@@ -52,10 +52,6 @@ services:
       DB_PASSWORD: mysecretpassword
       MONGO_HOST: mongo
       MONGO_PORT: 27017
-      NEO4J_HOST: neo4j
-      NEO4J_PORT: 7687
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: password
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - 5002:5000
@@ -64,7 +60,6 @@ services:
     depends_on:
       - db
       - mongo
-      - neo4j
       - kafka
     volumes:
       - .:/opt/app
@@ -87,17 +82,17 @@ services:
     networks:
       - web
     environment:
-      NEO4J_AUTH: neo4j/password
+      - NEO4J_AUTH=neo4j/password
 
   spark:
-    image: bitnami/spark:latest
-    environment:
-      - SPARK_MODE=master
-    ports:
-      - "7077:7077"
-      - "8080:8080"
-    networks:
-      - web
+      image: bitnami/spark:latest
+      environment:
+        - SPARK_MODE=master
+      ports:
+        - "7077:7077"
+        - "8080:8080"
+      networks:
+        - web
 
   spark-worker:
     image: bitnami/spark:latest
@@ -110,7 +105,7 @@ services:
       - spark
 
   surveyanalytics:
-    build:
+    build: 
       context: ./streamlit
     ports:
       - "8501:8501"
@@ -120,12 +115,8 @@ services:
       - web
     depends_on:
       - spark
-      - mongo
       - neo4j
-    environment:
-      NEO4J_USERNAME: neo4j
-      NEO4J_PASSWORD: password
-    command: ["streamlit", "run", "SurveyAnalytics.py"]
+    #command: ["poetry", "run", "streamlit", "run", "SurveyAnalytics.py"]
 
 networks:
   web:
