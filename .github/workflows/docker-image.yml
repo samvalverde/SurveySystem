@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - main
+      - devSam
 
   pull_request:
     branches:
       - main
+      - devSam
 
 jobs:
   test:
