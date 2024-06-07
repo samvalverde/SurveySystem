@@ -5,6 +5,10 @@ from pyspark.sql.functions import explode, col
 from pymongo import MongoClient
 from pyspark.sql import SparkSession
 from neo4j import GraphDatabase
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
+
 
 def create_nodes_and_relationships(driver, data_encuestas, data_respuestas):
     def create_encuesta(tx, id_encuesta, titulo_encuesta):
@@ -116,6 +120,60 @@ def showDF(encuestasDF, respuestasDF):
     except Exception as e:
         st.write(f"Error while converting respuestasDF to Pandas: {e}")
 
+def create_graphs(encuestasDF, respuestasDF):
+    st.write("Graphs:")
+
+    # Convert Spark DataFrames to Pandas DataFrames for easy plotting
+    encuestas_pd = encuestasDF.toPandas()
+    respuestas_pd = respuestasDF.toPandas()
+
+    # Example Graph 1: Number of Questions per Survey
+    st.write("Numero de Preguntas por Cuestionario")
+    num_questions_per_survey = encuestas_pd.groupby('id_encuesta').size().reset_index(name='num_questions')
+    fig1, ax1 = plt.subplots()
+    sns.barplot(data=num_questions_per_survey, x='id_encuesta', y='num_questions', ax=ax1)
+    st.pyplot(fig1)
+
+    # Example Graph 2: Number of Responses per User
+    st.write("Numero de Respuestas por Usuario")
+    num_responses_per_user = respuestas_pd.groupby('usuario_id').size().reset_index(name='num_responses')
+    fig2, ax2 = plt.subplots()
+    sns.barplot(data=num_responses_per_user, x='usuario_id', y='num_responses', ax=ax2)
+    st.pyplot(fig2)
+
+    # Example Graph 3: Distribution of Response Types
+    st.write("Distribucion de Tipos de Respuestas")
+    response_types = respuestas_pd['respuesta'].value_counts().reset_index(name='count')
+    fig3, ax3 = plt.subplots()
+    sns.barplot(data=response_types, x='index', y='count', ax=ax3)
+    ax3.set(xlabel='Response Type', ylabel='Count')
+    st.pyplot(fig3)
+
+    # Example Graph 4: Survey Titles Word Cloud (requires wordcloud library)
+    from wordcloud import WordCloud
+    st.write("Survey Titles Word Cloud")
+    wordcloud = WordCloud(width=800, height=400).generate(' '.join(encuestas_pd['titulo_encuesta']))
+    fig4, ax4 = plt.subplots()
+    ax4.imshow(wordcloud, interpolation='bilinear')
+    ax4.axis('off')
+    st.pyplot(fig4)
+
+    # Example Graph 5: Number of Questions by Question Type
+    st.write("Numero de Preguntas por Tipo")
+    num_questions_by_type = encuestas_pd.groupby('tipo_pregunta').size().reset_index(name='num_questions')
+    fig5, ax5 = plt.subplots()
+    sns.barplot(data=num_questions_by_type, x='tipo_pregunta', y='num_questions', ax=ax5)
+    st.pyplot(fig5)
+
+    # Example Graph 6: Responses by Question
+    st.write("Respuestas por Pregunta")
+    responses_by_question = respuestas_pd.groupby('texto_pregunta').size().reset_index(name='num_responses')
+    fig6, ax6 = plt.subplots()
+    sns.barplot(data=responses_by_question, x='texto_pregunta', y='num_responses', ax=ax6)
+    plt.xticks(rotation=90)
+    st.pyplot(fig6)
+
+
 def main():
     st.title("Survey Analytics")
 
@@ -161,6 +219,10 @@ def main():
     st.write("Neo4j and Spark initialized.")
     create_nodes_and_relationships(driver, data_encuestas, data_respuestas)
     st.write("Nodes and relationships created in Neo4j.")
+
+    # Call the create_graphs function to display the graphs
+    create_graphs(encuestasDF, respuestasDF)
+
 
 if __name__ == "__main__":
     main()
