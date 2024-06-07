@@ -13,6 +13,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 #Instalar PySpark
 RUN pip install pyspark
 
+#Instalar dependencias plotly
+RUN pip install matplotlib seaborn plotly
+
 #Instalar Java 17
 RUN apt-get update && apt-get install -y openjdk-17-jre
 
