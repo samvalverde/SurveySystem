@@ -1,4 +1,4 @@
-
+import redis
 import json
 from db import Database
 from dbMongo import MongoDatabase  # Importa la clase MongoDatabase
@@ -15,9 +15,11 @@ class AppService:
         self,
         database: Database,
         mongo_database: MongoDatabase,
+        redis_client: redis.StrictRedis,
     ):
         self.database = database
         self.mongo_database = mongo_database
+        self.redis_client = redis_client
         kafka_bootstrap_servers = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092")
 
         self.producer = self.initialize_kafka_producer(kafka_bootstrap_servers)
