@@ -8,4 +8,5 @@ kafka-python
 streamlit 
 neo4j
 pyspark
-pandas  
+pandas
+pyvis  

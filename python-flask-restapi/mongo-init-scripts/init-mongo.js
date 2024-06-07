@@ -39,7 +39,7 @@ db.encuestas.insertMany([
       {
         texto_pregunta: "¿Cuál es tu opinión sobre nuestro nuevo servicio?",
         tipo_pregunta: "abierta",
-        posibles_respuestas: null,
+        posibles_respuestas: "",
       },
       {
         texto_pregunta: "¿Qué tan satisfecho estás con la atención al cliente?",
