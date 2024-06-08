@@ -8,4 +8,7 @@ kafka-python
 streamlit 
 neo4j
 pyspark
-pandas  
+pandas
+networkx 
+plotly
+streamlit-autorefresh==1.0.1 
