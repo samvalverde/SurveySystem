@@ -7,8 +7,6 @@ import pytest
 from unittest.mock import MagicMock, patch
 from db import Database
 from dbMongo import MongoDatabase
-from app_service import AppService
-import redis
 
 
 # ---------------------------------------------------------------- Fixture para la base de datos de PostgreSQL ----------------------------------------------------------------
